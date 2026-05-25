@@ -1,0 +1,21 @@
+{
+  "name": "Tofík a cesta ku hviezdam",
+  "short_name": "Tofík",
+  "description": "Náučná hra na matematiku pre prvákov.",
+  "start_url": "./tofik-matematika.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#fef9e7",
+  "theme_color": "#ff8c42",
+  "lang": "sk",
+  "categories": ["education", "kids", "games"],
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
