@@ -23,7 +23,7 @@
   }
 
   body {
-    font-family: 'Fredoka', system-ui, -apple-system, sans-serif;
+    font-family: 'Nunito', system-ui, -apple-system, sans-serif;
     background: linear-gradient(170deg, var(--c-bg-top) 0%, var(--c-bg-mid) 55%, var(--c-bg-bot) 100%);
     color: var(--c-ink);
     user-select: none;
@@ -254,7 +254,7 @@
   }
 
   .welcome-stars {
-    font-family: 'Fredoka', sans-serif;
+    font-family: 'Nunito', sans-serif;
     font-size: 22px;
     font-weight: 600;
     color: var(--c-accent);
@@ -1188,7 +1188,7 @@
     box-shadow: 0 2px 0 #e0d8c5;
   }
   .mistake-problem {
-    font-family: 'Fredoka', monospace;
+    font-family: 'Nunito', monospace;
     font-weight: 600;
     color: var(--c-ink);
   }

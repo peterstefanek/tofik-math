@@ -1,7 +1,7 @@
 // Tofík — Service Worker
 // Strategy: cache-first for app shell, network fallback for everything else
 
-const CACHE_NAME = 'tofik-v5';
+const CACHE_NAME = 'tofik-v6';
 const APP_SHELL = [
   './',
   './index.html',
@@ -9,7 +9,7 @@ const APP_SHELL = [
   './app.js',
   './manifest.json',
   './icon.svg',
-  'https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Caveat:wght@700&display=swap',
+  'https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&family=Caveat:wght@700&display=swap',
   'https://cdnjs.cloudflare.com/ajax/libs/tone/14.9.12/Tone.js',
 ];
 
