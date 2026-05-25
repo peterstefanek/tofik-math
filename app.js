@@ -818,7 +818,7 @@ function difficultyTier(type) {
 const WORD_PROBLEMS = [
   { emoji:'🍪', text:(a,b,e)=>`Tomáš má ${a} ${e} keksíkov. Dostal ešte ${b} ${e}. Koľko má spolu?`,           a:()=>5+rand(7),  b:()=>2+rand(6),  op:'+' },
   { emoji:'✏️', text:(a,b,e)=>`Jana má ${a} ${e} ceruziek. Dala ${b} ${e} kamarátke. Koľko jej ostalo?`,        a:()=>8+rand(8),  b:()=>2+rand(6),  op:'-' },
-  { emoji:'🍏', text:(a,b,e)=>`V košíku je ${a} ${e} jabĺk. Pribudlo ${b} ${e}. Koľko ich je spolu?`,          a:()=>4+rand(8),  b:()=>3+rand(7),  op:'+' },
+  { emoji:'🍏', text:(a,b,e)=>`V košíku je ${a} ${e} jabĺk. Pribudlo ${b} ${e}. Koľko ich je spolu?`,          a:()=>5+rand(7),  b:()=>3+rand(7),  op:'+' },
   { emoji:'🐦', text:(a,b,e)=>`Na strome sedelo ${a} ${e} vtákov. Odletelo ${b} ${e}. Koľko zostalo?`,         a:()=>10+rand(8), b:()=>3+rand(7),  op:'-' },
   { emoji:'🧁', text:(a,b,e)=>`Mama upiekla ${a} ${e} buchiet. Ocko zjedol ${b} ${e}. Koľko buchiet ostalo?`,   a:()=>10+rand(7), b:()=>2+rand(6),  op:'-' },
   { emoji:'🔴', text:(a,b,e)=>`Vo fľaši bolo ${a} ${e} guličiek. Pridal som ${b} ${e}. Koľko ich je?`,          a:()=>6+rand(9),  b:()=>2+rand(6),  op:'+' },
