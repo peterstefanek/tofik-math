@@ -1,7 +1,7 @@
 // Tofík — Service Worker
 // Strategy: cache-first for app shell, network fallback for everything else
 
-const CACHE_NAME = 'tofik-v3';
+const CACHE_NAME = 'tofik-v4';
 const APP_SHELL = [
   './',
   './index.html',
@@ -19,8 +19,13 @@ self.addEventListener('install', (event) => {
       .then((cache) => cache.addAll(APP_SHELL).catch(() => {
         // Network error on initial install — caching what we can
       }))
-      .then(() => self.skipWaiting())
   );
+  // Do NOT call skipWaiting() here — the app detects the waiting SW
+  // and shows an update banner; skipWaiting is triggered by user action.
+});
+
+self.addEventListener('message', (event) => {
+  if (event.data?.type === 'SKIP_WAITING') self.skipWaiting();
 });
 
 self.addEventListener('activate', (event) => {

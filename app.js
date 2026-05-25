@@ -1747,13 +1747,50 @@ function setupLongPress(el, callback, ms = 1000) {
   el.addEventListener('mouseleave', cancel);
 }
 
-// ========== SERVICE WORKER (for PWA install) ==========
+// ========== SERVICE WORKER (for PWA install + update detection) ==========
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('service-worker.js').catch(() => {
+    navigator.serviceWorker.register('service-worker.js').then((reg) => {
+      const onWaiting = () => showUpdateBanner(reg);
+
+      // New SW waiting right after registration (page refreshed while update pending)
+      if (reg.waiting) onWaiting();
+
+      // New SW found during this session
+      reg.addEventListener('updatefound', () => {
+        reg.installing.addEventListener('statechange', function () {
+          if (this.state === 'installed' && navigator.serviceWorker.controller) onWaiting();
+        });
+      });
+
+      // After SKIP_WAITING the controller changes — reload to get new assets
+      navigator.serviceWorker.addEventListener('controllerchange', () => location.reload());
+    }).catch(() => {
       // SW only works when served over http(s); fails silently in file:// or sandboxed previews
     });
   });
+}
+
+function showUpdateBanner(reg) {
+  if (document.getElementById('update-banner')) return;
+  const banner = document.createElement('div');
+  banner.id = 'update-banner';
+  banner.className = 'update-banner';
+  banner.innerHTML = `
+    <span>Nová verzia je k dispozícii 🎉</span>
+    <button class="btn" onclick="applyUpdate()">Obnoviť</button>
+  `;
+  document.querySelector('.app').appendChild(banner);
+  window._swReg = reg;
+}
+
+function applyUpdate() {
+  const reg = window._swReg;
+  if (reg?.waiting) {
+    reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+  } else {
+    location.reload();
+  }
 }
 
 // Unlock AudioContext pri prvom user gesture

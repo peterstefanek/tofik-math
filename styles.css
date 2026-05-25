@@ -1246,6 +1246,36 @@
   }
   .parent-gear:active { opacity: 0.8; }
 
+  /* ===== UPDATE BANNER ===== */
+  .update-banner {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #2d2d2d;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 20px;
+    padding-bottom: calc(12px + env(safe-area-inset-bottom));
+    z-index: 9999;
+    font-size: 15px;
+    font-family: inherit;
+  }
+  .update-banner .btn {
+    background: var(--c-accent);
+    color: #fff;
+    font-size: 14px;
+    padding: 8px 18px;
+    border-radius: 20px;
+    white-space: nowrap;
+    box-shadow: none;
+    min-width: unset;
+    width: auto;
+  }
+
   /* ===== AUDIO UI ===== */
   .map-mute-btn {
     font-size: 20px;
