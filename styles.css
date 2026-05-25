@@ -704,8 +704,27 @@
     text-align: center;
     padding: 0 8px;
   }
+  .wordproblem-visual {
+    font-size: 28px;
+    text-align: center;
+    line-height: 1.6;
+    letter-spacing: 3px;
+    padding: 4px 8px;
+    flex-wrap: wrap;
+    word-break: break-all;
+  }
 
   /* magic square */
+  .magic-sparkles {
+    font-size: 22px;
+    text-align: center;
+    letter-spacing: 8px;
+    animation: magic-glow 2s ease-in-out infinite alternate;
+  }
+  @keyframes magic-glow {
+    from { opacity: 0.6; transform: scale(0.95); }
+    to   { opacity: 1;   transform: scale(1.05); }
+  }
   .magic-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -734,6 +753,33 @@
     color: var(--c-accent);
     animation: pulse-soft 1.5s ease-in-out infinite;
   }
+
+  .magic-help-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    margin-top: 6px;
+  }
+  .magic-help-btn {
+    font-size: 15px !important;
+    padding: 10px 18px !important;
+  }
+  .magic-help-panel {
+    background: rgba(255,255,255,0.85);
+    border: 2px solid var(--c-yellow);
+    border-radius: 16px;
+    padding: 14px 16px;
+    max-width: 300px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+  .magic-help-icon { font-size: 32px; }
+  .magic-help-text { font-size: 15px; line-height: 1.5; color: var(--c-ink); }
+  .magic-help-sum  { font-size: 20px; color: var(--c-accent); }
 
   /* compare big numbers (pokrocile, values > 10) */
   .compare-big-num {
@@ -918,6 +964,15 @@
     width: 100%;
     max-width: 360px;
     margin: 0 auto;
+  }
+  .bean-count-badge {
+    font-size: 56px;
+    font-weight: 700;
+    color: var(--c-accent);
+    text-align: center;
+    line-height: 1;
+    margin-bottom: 2px;
+    text-shadow: 0 3px 0 rgba(255,140,66,0.25);
   }
   .bean-instruction {
     font-size: 17px;

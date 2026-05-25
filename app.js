@@ -103,7 +103,7 @@ function questionLabel(q) {
     case 'seqstep':      return q.seq.map((n, i) => i === q.pos ? '?' : n).join(', ');
     case 'peniaze':      return `Spočítaj: ${q.items.map(i => i.val+'€').join(' + ')}`;
     case 'wordproblem':  return q.prompt;
-    case 'magic':        return `Magický štvorec (sum=${q.sum})`;
+    case 'magic':        return 'Magický štvorec';
   }
   return q.type;
 }
@@ -816,14 +816,14 @@ function difficultyTier(type) {
 
 // ========== WORD PROBLEMS BANK ==========
 const WORD_PROBLEMS = [
-  { text: (a,b) => `Tomáš má ${a} keksíkov. Dostal ešte ${b}. Koľko má spolu?`,          a:()=>5+rand(7),  b:()=>2+rand(6),  op:'+' },
-  { text: (a,b) => `Jana má ${a} ceruziek. Dala ${b} kamarátke. Koľko jej ostalo?`,       a:()=>8+rand(8),  b:()=>2+rand(6),  op:'-' },
-  { text: (a,b) => `V záhrade je ${a} jabĺk a ${b} hrušiek. Koľko ovocia je spolu?`,      a:()=>4+rand(8),  b:()=>3+rand(7),  op:'+' },
-  { text: (a,b) => `Na strome sedelo ${a} vtákov. Odletelo ${b}. Koľko zostalo?`,         a:()=>10+rand(8), b:()=>3+rand(7),  op:'-' },
-  { text: (a,b) => `Mama upiekla ${a} buchiet. Ocko zjedol ${b}. Koľko buchiet ostalo?`,  a:()=>10+rand(7), b:()=>2+rand(6),  op:'-' },
-  { text: (a,b) => `Vo fľaši bolo ${a} guličiek. Pridal som ${b}. Koľko ich je?`,         a:()=>6+rand(9),  b:()=>2+rand(6),  op:'+' },
-  { text: (a,b) => `Peter má ${a} nálepiek. Zdenko má o ${b} menej. Koľko má Zdenko?`,    a:()=>10+rand(8), b:()=>2+rand(7),  op:'-' },
-  { text: (a,b) => `Anička nazbierala ${a} gaštanov. Zošla ešte ${b}. Koľko ich má?`,     a:()=>5+rand(9),  b:()=>2+rand(7),  op:'+' },
+  { emoji:'🍪', text:(a,b)=>`Tomáš má ${a} keksíkov. Dostal ešte ${b}. Koľko má spolu?`,          a:()=>5+rand(7),  b:()=>2+rand(6),  op:'+' },
+  { emoji:'✏️', text:(a,b)=>`Jana má ${a} ceruziek. Dala ${b} kamarátke. Koľko jej ostalo?`,       a:()=>8+rand(8),  b:()=>2+rand(6),  op:'-' },
+  { emoji:'🍏', text:(a,b)=>`V záhrade je ${a} jabĺk a ${b} hrušiek. Koľko ovocia je spolu?`,      a:()=>4+rand(8),  b:()=>3+rand(7),  op:'+' },
+  { emoji:'🐦', text:(a,b)=>`Na strome sedelo ${a} vtákov. Odletelo ${b}. Koľko zostalo?`,         a:()=>10+rand(8), b:()=>3+rand(7),  op:'-' },
+  { emoji:'🧁', text:(a,b)=>`Mama upiekla ${a} buchiet. Ocko zjedol ${b}. Koľko buchiet ostalo?`,  a:()=>10+rand(7), b:()=>2+rand(6),  op:'-' },
+  { emoji:'🔴', text:(a,b)=>`Vo fľaši bolo ${a} guličiek. Pridal som ${b}. Koľko ich je?`,         a:()=>6+rand(9),  b:()=>2+rand(6),  op:'+' },
+  { emoji:'🏷️', text:(a,b)=>`Peter má ${a} nálepiek. Zdenko má o ${b} menej. Koľko má Zdenko?`,    a:()=>10+rand(8), b:()=>2+rand(7),  op:'-' },
+  { emoji:'🌰', text:(a,b)=>`Anička nazbierala ${a} gaštanov. Zošla ešte ${b}. Koľko ich má?`,     a:()=>5+rand(9),  b:()=>2+rand(7),  op:'+' },
 ];
 
 // ========== MAGIC SQUARES BANK (row-major, all rows+cols sum to `sum`) ==========
@@ -1034,6 +1034,7 @@ function generateOne(type, tier = null) {
       return {
         type, answer: sum,
         prompt: t.text(a, b),
+        emoji: t.emoji,
         a, b, sum, op: t.op,
         options: makeOptions(sum, 0, 20),
       };
@@ -1044,7 +1045,7 @@ function generateOne(type, tier = null) {
       const answer = ms.grid[blankPos];
       return {
         type, answer,
-        prompt: `Aké číslo chýba? (Súčet v každom riadku a stĺpci je ${ms.sum})`,
+        prompt: 'Aké číslo chýba v magickom štvorci?',
         grid: ms.grid, blankPos, sum: ms.sum,
         options: makeOptions(answer, 0, 14),
       };
@@ -1258,11 +1259,21 @@ function renderQuestion() {
     }
     case 'wordproblem': {
       prompt.classList.add('wordproblem-prompt');
-      // visual stays empty — the story is the prompt itself
+      // Show emoji illustration of the initial quantity (cap at 12 to avoid overflow)
+      const illus = document.createElement('div');
+      illus.className = 'wordproblem-visual';
+      illus.textContent = q.emoji.repeat(Math.min(q.a, 12));
+      visual.appendChild(illus);
       renderAnswerButtons(q.options, q.answer);
       break;
     }
     case 'magic': {
+      // Sparkle decoration
+      const sparkles = document.createElement('div');
+      sparkles.className = 'magic-sparkles';
+      sparkles.innerHTML = '✨ 🌟 ✨';
+      visual.appendChild(sparkles);
+
       const grid = document.createElement('div');
       grid.className = 'magic-grid';
       q.grid.forEach((num, i) => {
@@ -1272,6 +1283,32 @@ function renderQuestion() {
         grid.appendChild(cell);
       });
       visual.appendChild(grid);
+
+      // Help button + collapsible panel
+      const helpWrap = document.createElement('div');
+      helpWrap.className = 'magic-help-wrap';
+      const helpBtn = document.createElement('button');
+      helpBtn.className = 'btn secondary magic-help-btn';
+      helpBtn.textContent = '💡 Potrebujem pomoc';
+      const helpPanel = document.createElement('div');
+      helpPanel.className = 'magic-help-panel';
+      helpPanel.hidden = true;
+      helpPanel.innerHTML = `
+        <div class="magic-help-icon">🔮</div>
+        <div class="magic-help-text">
+          V magickom štvorci platí: súčet čísel v každom <b>riadku</b> aj každom <b>stĺpci</b> je vždy rovnaký.
+        </div>
+        <div class="magic-help-sum">Súčet = <b>${q.sum}</b></div>
+      `;
+      helpBtn.addEventListener('click', () => {
+        helpPanel.hidden = !helpPanel.hidden;
+        helpBtn.textContent = helpPanel.hidden ? '💡 Potrebujem pomoc' : '💡 Skryť nápovedu';
+        audio.play('tap');
+      });
+      helpWrap.appendChild(helpBtn);
+      helpWrap.appendChild(helpPanel);
+      visual.appendChild(helpWrap);
+
       renderAnswerButtons(q.options, q.answer);
       break;
     }
@@ -1427,7 +1464,8 @@ async function renderRozkladShake(q, visual) {
   const wrap = document.createElement('div');
   wrap.className = 'bean-wrap';
   wrap.innerHTML = `
-    <div class="bean-instruction" id="bean-instruction">Zatras telefónom a rozhoď ${q.total} fazuľ!</div>
+    <div class="bean-count-badge">${q.total}</div>
+    <div class="bean-instruction" id="bean-instruction">Zatras a rozhoď fazule do košíkov!</div>
     <div class="bean-stage" id="bean-stage">
       <div class="basket left"><div class="basket-floor"></div><div class="basket-label" id="basket-label-l">?</div></div>
       <div class="basket right"><div class="basket-floor"></div><div class="basket-label" id="basket-label-r">?</div></div>
