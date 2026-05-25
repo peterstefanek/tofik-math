@@ -6,6 +6,8 @@ const state = {
   mistakesInLevel: 0,
   totalStars: 0,
   inBonus: false,
+  bonusTimerInterval: null,
+  bonusTimeLeft: 0,
   pet: { species: 'fox', name: 'Tofík' },
   mode: null, // 'do10' | 'do20' — null until chosen
   levels: [
@@ -438,7 +440,7 @@ function confirmPet() {
 
 function startGame() { showScreen('map'); renderMap(); }
 function goWelcome() { showScreen('welcome'); updateWelcomeStars(); }
-function goMap() { stopAllSensors(); state.inBonus = false; showScreen('map'); renderMap(); checkWin(); }
+function goMap() { stopAllSensors(); stopBonusTimer(); state.inBonus = false; showScreen('map'); renderMap(); checkWin(); }
 
 // Jump straight into the next undone level (primary action from the map)
 function continueToCurrentLevel() {
@@ -669,7 +671,7 @@ function renderMap() {
     node.innerHTML = `
       <div class="node-icon">${lvl.icon}</div>
       <div class="node-num">${lvl.name}</div>
-      ${lvl.done ? `<div class="node-stars">${'⭐'.repeat(lvl.stars)}</div>` : ''}
+      ${lvl.done ? `<div class="node-stars">${'⭐'.repeat(lvl.stars)}${lvl.bonus ? '<span class="node-bonus-star">🌟</span>' : ''}</div>` : ''}
     `;
 
     if (!node.classList.contains('locked')) {
@@ -1736,6 +1738,7 @@ function showFeedback(text, isError = false) {
 function advance() {
   stopAllSensors();
   if (state.inBonus) {
+    stopBonusTimer();
     state.levels[state.levelIdx].bonus = true;
     state.inBonus = false;
     finishLevel();
@@ -1771,23 +1774,54 @@ function showBonusPrompt() {
 }
 
 function startBonusQuestion() {
-  const currentType = state.levels[state.levelIdx].type;
-  const allTypes = ['count', 'add5', 'rozklad', 'compare', 'add10', 'sequence', 'addsub20'];
+  // Pick the type from this level's mode sequence; use tier 2 (hardest) for the bonus
+  const currentType = getLevelType(state.levelIdx);
+  const allTypes = LEVEL_TYPES[state.mode] ?? LEVEL_TYPES.do20;
   let bonusType = currentType;
-  let baseTier = difficultyTier(currentType);
-  let minTier = baseTier;
+  let minTier = difficultyTier(currentType);
   for (const t of allTypes) {
     if (t === currentType) continue;
     const tier = difficultyTier(t);
     if (tier < minTier) { minTier = tier; bonusType = t; }
   }
-  const bonusTier = Math.min(2, Math.max(0, minTier + 1));
-  const q = generateOne(bonusType, bonusTier);
-  q.prompt = '🌟 ' + q.prompt;
+  const q = generateOne(bonusType, 2); // always tier 2 — hardest variant
+  q.prompt = '⭐ ' + q.prompt;
   state.currentQuestions.push(q);
   state.questionIdx = QUESTIONS_PER_LEVEL;
   state.inBonus = true;
   renderQuestion();
+  startBonusTimer();
+}
+
+const BONUS_SECONDS = 15;
+
+function startBonusTimer() {
+  stopBonusTimer();
+  state.bonusTimeLeft = BONUS_SECONDS;
+  const timerEl = document.getElementById('bonus-timer');
+  timerEl.textContent = state.bonusTimeLeft;
+  timerEl.className = 'bonus-timer';
+  timerEl.hidden = false;
+
+  state.bonusTimerInterval = setInterval(() => {
+    if (!state.inBonus) { stopBonusTimer(); return; }
+    state.bonusTimeLeft--;
+    timerEl.textContent = state.bonusTimeLeft;
+    if (state.bonusTimeLeft <= 5) timerEl.classList.add('urgent');
+    if (state.bonusTimeLeft <= 0) {
+      stopBonusTimer();
+      state.inBonus = false;
+      showFeedback('⏰ Čas vypršal!', true);
+      setTimeout(() => finishLevel(), 1400);
+    }
+  }, 1000);
+}
+
+function stopBonusTimer() {
+  clearInterval(state.bonusTimerInterval);
+  state.bonusTimerInterval = null;
+  const timerEl = document.getElementById('bonus-timer');
+  if (timerEl) timerEl.hidden = true;
 }
 
 function finishLevel() {
@@ -1839,6 +1873,7 @@ function showResultScreen(stars) {
   if (lvl.bonus) {
     const bonusStar = document.createElement('div');
     bonusStar.className = 'star-bonus';
+    bonusStar.textContent = '🌟';
     starsDisplay.appendChild(bonusStar);
     setTimeout(() => {
       bonusStar.classList.add('show');

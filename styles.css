@@ -1445,6 +1445,28 @@
   .star-bonus.show {
     animation: star-pop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
   }
+  .bonus-timer {
+    font-size: 22px;
+    font-weight: 700;
+    min-width: 38px;
+    text-align: center;
+    color: #5ca85c;
+    background: rgba(92, 168, 92, 0.14);
+    border-radius: 8px;
+    padding: 4px 8px;
+    flex-shrink: 0;
+    transition: color 0.4s, background 0.4s;
+  }
+  .bonus-timer.urgent {
+    color: #e84040;
+    background: rgba(232, 64, 64, 0.13);
+    animation: pulse 0.6s ease infinite;
+  }
+  .node-bonus-star {
+    font-size: 10px;
+    vertical-align: middle;
+    animation: pulse 1.8s ease infinite;
+  }
 
   /* ========== TABLET (≥ 600px wide) ========== */
   @media (min-width: 600px) {
