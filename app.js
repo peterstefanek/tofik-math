@@ -418,7 +418,7 @@ function confirmPet() {
 
 function startGame() { showScreen('map'); renderMap(); }
 function goWelcome() { showScreen('welcome'); updateWelcomeStars(); }
-function goMap() { stopAllSensors(); showScreen('map'); renderMap(); checkWin(); }
+function goMap() { stopAllSensors(); state.inBonus = false; showScreen('map'); renderMap(); checkWin(); }
 
 // Jump straight into the next undone level (primary action from the map)
 function continueToCurrentLevel() {
@@ -961,6 +961,7 @@ function startLevel(idx) {
   state.levelIdx = idx;
   state.questionIdx = 0;
   state.mistakesInLevel = 0;
+  state.inBonus = false;
   state.currentQuestions = generateQuestions(state.levels[idx].type);
   showScreen('level');
   renderQuestion();
