@@ -823,7 +823,7 @@ const WORD_PROBLEMS = [
   { emoji:'🧁', text:(a,b,e)=>`Mama upiekla ${a} ${e} buchiet. Ocko zjedol ${b} ${e}. Koľko buchiet ostalo?`,   a:()=>10+rand(7), b:()=>2+rand(6),  op:'-' },
   { emoji:'🔴', text:(a,b,e)=>`Vo fľaši bolo ${a} ${e} guličiek. Pridal som ${b} ${e}. Koľko ich je?`,          a:()=>6+rand(9),  b:()=>2+rand(6),  op:'+' },
   { emoji:'🏷️', text:(a,b,e)=>`Peter má ${a} ${e} nálepiek. Zdenko má o ${b} ${e} menej. Koľko má Zdenko?`,     a:()=>10+rand(8), b:()=>2+rand(7),  op:'-' },
-  { emoji:'🌰', text:(a,b,e)=>`Anička nazbierala ${a} ${e} gaštanov. Zošla ešte ${b} ${e}. Koľko ich má?`,      a:()=>5+rand(9),  b:()=>2+rand(7),  op:'+' },
+  { emoji:'🌰', text:(a,b,e)=>`Anička nazbierala ${a} ${e} gaštanov. Nazbierala ešte ${b} ${e}. Koľko ich má?`, a:()=>5+rand(9),  b:()=>2+rand(7),  op:'+' },
 ];
 
 // ========== MAGIC SQUARES BANK (row-major, all rows+cols sum to `sum`) ==========
