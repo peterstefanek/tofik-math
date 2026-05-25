@@ -310,6 +310,10 @@
     justify-content: space-between;
     margin-bottom: 12px;
   }
+  .map-header .icon-btn {
+    background: white;
+    box-shadow: 0 3px 0 var(--c-shadow);
+  }
   .map-title {
     font-size: 22px;
     font-weight: 600;
