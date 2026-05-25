@@ -99,7 +99,7 @@ function questionLabel(q) {
     case 'compare':      return `${q.a} ⚖ ${q.b}`;
     case 'rozklad':      return `${q.part} + ? = ${q.total}`;
     case 'sequence':     return q.seq.map((n, i) => i === q.pos ? '?' : n).join(', ');
-    case 'rozklad20':    return `10 + ? = ${q.total}`;
+    case 'rozklad20':    return `${q.part} + ? = ${q.total}`;
     case 'seqstep':      return q.seq.map((n, i) => i === q.pos ? '?' : n).join(', ');
     case 'peniaze':      return `Prasiatko: ${q.items.map(i=>i.val+'€').join('+')} = ${q.total}€`;
     case 'wordproblem':  return q.prompt;
@@ -991,8 +991,10 @@ function generateOne(type, tier = null) {
     }
     case 'rozklad20': {
       const total = 11 + rand(10); // 11..20
-      const part = 10;
-      const answer = total - 10;
+      // answer ∈ [1..min(10, total-1)] — keeps right branch ≤ 10 dots; part varies naturally
+      const maxAnswer = Math.min(10, total - 1);
+      const answer = 1 + rand(maxAnswer);
+      const part = total - answer;
       return {
         type, variant: 'tree', answer, emoji,
         prompt: `Koľko chýba do ${total}?`,
@@ -1192,9 +1194,8 @@ function renderQuestion() {
       } else {
         const tree = document.createElement('div');
         tree.className = 'rozklad-tree';
-        // rozklad20: show dots only up to 10 to avoid overflow
         const dotCountLeft = Math.min(10, q.part);
-        const dotCountRight = Math.min(3, q.total - q.part);
+        const dotCountRight = Math.min(10, q.total - q.part);
         tree.innerHTML = `
           <div class="rozklad-top">${q.total}</div>
           <svg class="rozklad-lines" viewBox="0 0 200 30" preserveAspectRatio="none" aria-hidden="true">
