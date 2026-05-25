@@ -350,6 +350,20 @@ function clearSavedState() {
   try { localStorage.removeItem(SAVE_KEY); } catch (e) {}
 }
 
+// Storage Persistence API — prevents browser from evicting data under storage pressure
+async function requestPersistentStorage() {
+  if (!navigator.storage?.persist) return;
+  try {
+    const already = await navigator.storage.persisted();
+    if (!already) await navigator.storage.persist();
+  } catch (e) { /* API blocked or unavailable */ }
+}
+
+async function getStoragePersisted() {
+  if (!navigator.storage?.persisted) return null;
+  try { return await navigator.storage.persisted(); } catch (e) { return null; }
+}
+
 // Number of active levels in current mode
 function activeLevelCount() {
   return state.mode === 'do10' ? 6 : 7;
@@ -487,7 +501,25 @@ function renderParentStats() {
                oninput="audio.setVolume(this.value / 100)">
       </div>
     </div>
+    <div class="storage-status-wrap" id="storage-status">
+      <span class="storage-status-icon">⏳</span>
+      <span class="storage-status-text">Kontrolujem ochranu dát…</span>
+    </div>
   `;
+  // Async: fill in real storage persistence status after render
+  getStoragePersisted().then(persisted => {
+    const el = document.getElementById('storage-status');
+    if (!el) return;
+    if (persisted === null) {
+      el.innerHTML = '<span class="storage-status-icon">ℹ️</span><span class="storage-status-text">Ochrana úložiska nie je dostupná v tomto prehliadači.</span>';
+    } else if (persisted) {
+      el.innerHTML = '<span class="storage-status-icon">🔒</span><span class="storage-status-text">Dáta sú chránené — prehliadač ich nevymaže bez tvojho súhlasu.</span>';
+      el.classList.add('storage-ok');
+    } else {
+      el.innerHTML = '<span class="storage-status-icon">⚠️</span><span class="storage-status-text">Dáta nie sú chránené. Prehliadač ich môže vymazať pri plnom úložisku.</span><button class="storage-persist-btn" onclick="requestPersistentStorage().then(()=>renderParentStats())">Chrániť dáta</button>';
+      el.classList.add('storage-warn');
+    }
+  });
 
   if (total === 0) {
     root.innerHTML = audioHtml + `
@@ -2195,6 +2227,7 @@ function init() {
   loadState();
   loadStats();
   applyPet();
+  requestPersistentStorage();
 
   // Long-press on stars counter (map screen) opens parent stats
   const starsCounter = document.querySelector('.stars-total');
