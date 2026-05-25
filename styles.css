@@ -778,19 +778,54 @@
 
   /* wordproblem */
   .wordproblem-prompt {
-    font-size: 20px !important;
+    font-size: 19px !important;
     line-height: 1.5 !important;
     text-align: center;
     padding: 0 8px;
   }
-  .wordproblem-visual {
-    font-size: 28px;
-    text-align: center;
-    line-height: 1.6;
-    letter-spacing: 3px;
-    padding: 4px 8px;
+  .wp-help-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    margin-top: 4px;
+  }
+  .wp-help-btn {
+    font-size: 15px !important;
+    padding: 10px 18px !important;
+  }
+  .wp-help-panel {
+    background: rgba(255,255,255,0.92);
+    border: 2px solid var(--c-blue);
+    border-radius: 16px;
+    padding: 10px 14px;
+    max-width: 320px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+  }
+  .wp-help-panel[hidden] { display: none; }
+  .wp-hint-row {
+    display: flex;
     flex-wrap: wrap;
-    word-break: break-all;
+    justify-content: center;
+    gap: 1px;
+    font-size: 24px;
+    line-height: 1.3;
+    max-width: 300px;
+  }
+  .wp-hint-op {
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--c-accent);
+    font-family: 'Baloo 2', sans-serif;
+  }
+  .wp-crossed {
+    opacity: 0.35;
+    text-decoration: line-through;
+    text-decoration-color: var(--c-accent-2);
+    text-decoration-thickness: 2px;
   }
 
   /* magic square */

@@ -816,14 +816,14 @@ function difficultyTier(type) {
 
 // ========== WORD PROBLEMS BANK ==========
 const WORD_PROBLEMS = [
-  { emoji:'🍪', text:(a,b)=>`Tomáš má ${a} keksíkov. Dostal ešte ${b}. Koľko má spolu?`,          a:()=>5+rand(7),  b:()=>2+rand(6),  op:'+' },
-  { emoji:'✏️', text:(a,b)=>`Jana má ${a} ceruziek. Dala ${b} kamarátke. Koľko jej ostalo?`,       a:()=>8+rand(8),  b:()=>2+rand(6),  op:'-' },
-  { emoji:'🍏', text:(a,b)=>`V záhrade je ${a} jabĺk a ${b} hrušiek. Koľko ovocia je spolu?`,      a:()=>4+rand(8),  b:()=>3+rand(7),  op:'+' },
-  { emoji:'🐦', text:(a,b)=>`Na strome sedelo ${a} vtákov. Odletelo ${b}. Koľko zostalo?`,         a:()=>10+rand(8), b:()=>3+rand(7),  op:'-' },
-  { emoji:'🧁', text:(a,b)=>`Mama upiekla ${a} buchiet. Ocko zjedol ${b}. Koľko buchiet ostalo?`,  a:()=>10+rand(7), b:()=>2+rand(6),  op:'-' },
-  { emoji:'🔴', text:(a,b)=>`Vo fľaši bolo ${a} guličiek. Pridal som ${b}. Koľko ich je?`,         a:()=>6+rand(9),  b:()=>2+rand(6),  op:'+' },
-  { emoji:'🏷️', text:(a,b)=>`Peter má ${a} nálepiek. Zdenko má o ${b} menej. Koľko má Zdenko?`,    a:()=>10+rand(8), b:()=>2+rand(7),  op:'-' },
-  { emoji:'🌰', text:(a,b)=>`Anička nazbierala ${a} gaštanov. Zošla ešte ${b}. Koľko ich má?`,     a:()=>5+rand(9),  b:()=>2+rand(7),  op:'+' },
+  { emoji:'🍪', text:(a,b,e)=>`Tomáš má ${a} ${e} keksíkov. Dostal ešte ${b} ${e}. Koľko má spolu?`,           a:()=>5+rand(7),  b:()=>2+rand(6),  op:'+' },
+  { emoji:'✏️', text:(a,b,e)=>`Jana má ${a} ${e} ceruziek. Dala ${b} ${e} kamarátke. Koľko jej ostalo?`,        a:()=>8+rand(8),  b:()=>2+rand(6),  op:'-' },
+  { emoji:'🍏', text:(a,b,e)=>`V košíku je ${a} ${e} jabĺk. Pribudlo ${b} ${e}. Koľko ich je spolu?`,          a:()=>4+rand(8),  b:()=>3+rand(7),  op:'+' },
+  { emoji:'🐦', text:(a,b,e)=>`Na strome sedelo ${a} ${e} vtákov. Odletelo ${b} ${e}. Koľko zostalo?`,         a:()=>10+rand(8), b:()=>3+rand(7),  op:'-' },
+  { emoji:'🧁', text:(a,b,e)=>`Mama upiekla ${a} ${e} buchiet. Ocko zjedol ${b} ${e}. Koľko buchiet ostalo?`,   a:()=>10+rand(7), b:()=>2+rand(6),  op:'-' },
+  { emoji:'🔴', text:(a,b,e)=>`Vo fľaši bolo ${a} ${e} guličiek. Pridal som ${b} ${e}. Koľko ich je?`,          a:()=>6+rand(9),  b:()=>2+rand(6),  op:'+' },
+  { emoji:'🏷️', text:(a,b,e)=>`Peter má ${a} ${e} nálepiek. Zdenko má o ${b} ${e} menej. Koľko má Zdenko?`,     a:()=>10+rand(8), b:()=>2+rand(7),  op:'-' },
+  { emoji:'🌰', text:(a,b,e)=>`Anička nazbierala ${a} ${e} gaštanov. Zošla ešte ${b} ${e}. Koľko ich má?`,      a:()=>5+rand(9),  b:()=>2+rand(7),  op:'+' },
 ];
 
 // ========== MAGIC SQUARES BANK (row-major, all rows+cols sum to `sum`) ==========
@@ -1033,7 +1033,7 @@ function generateOne(type, tier = null) {
       const sum = t.op === '+' ? a + b : a - b;
       return {
         type, answer: sum,
-        prompt: t.text(a, b),
+        prompt: t.text(a, b, t.emoji),
         emoji: t.emoji,
         a, b, sum, op: t.op,
         options: makeOptions(sum, 0, 20),
@@ -1251,11 +1251,23 @@ function renderQuestion() {
     }
     case 'wordproblem': {
       prompt.classList.add('wordproblem-prompt');
-      // Show emoji illustration of the initial quantity (cap at 12 to avoid overflow)
-      const illus = document.createElement('div');
-      illus.className = 'wordproblem-visual';
-      illus.textContent = q.emoji.repeat(Math.min(q.a, 12));
-      visual.appendChild(illus);
+      const wpHelpWrap = document.createElement('div');
+      wpHelpWrap.className = 'wp-help-wrap';
+      const wpHelpBtn = document.createElement('button');
+      wpHelpBtn.className = 'btn secondary wp-help-btn';
+      wpHelpBtn.textContent = '💡 Zobraziť nápovedu';
+      const wpHelpPanel = document.createElement('div');
+      wpHelpPanel.className = 'wp-help-panel';
+      wpHelpPanel.hidden = true;
+      buildWpHint(wpHelpPanel, q);
+      wpHelpBtn.addEventListener('click', () => {
+        wpHelpPanel.hidden = !wpHelpPanel.hidden;
+        wpHelpBtn.textContent = wpHelpPanel.hidden ? '💡 Zobraziť nápovedu' : '💡 Skryť nápovedu';
+        audio.play('tap');
+      });
+      wpHelpWrap.appendChild(wpHelpBtn);
+      wpHelpWrap.appendChild(wpHelpPanel);
+      visual.appendChild(wpHelpWrap);
       renderAnswerButtons(q.options, q.answer);
       break;
     }
@@ -1304,6 +1316,39 @@ function renderQuestion() {
       renderAnswerButtons(q.options, q.answer);
       break;
     }
+  }
+}
+
+function buildWpHint(panel, q) {
+  const cap = 20;
+  if (q.op === '+') {
+    const rowA = document.createElement('div');
+    rowA.className = 'wp-hint-row';
+    for (let i = 0; i < Math.min(q.a, cap); i++) {
+      const s = document.createElement('span'); s.textContent = q.emoji; rowA.appendChild(s);
+    }
+    const opEl = document.createElement('div');
+    opEl.className = 'wp-hint-op'; opEl.textContent = '+';
+    const rowB = document.createElement('div');
+    rowB.className = 'wp-hint-row';
+    for (let i = 0; i < Math.min(q.b, cap); i++) {
+      const s = document.createElement('span'); s.textContent = q.emoji; rowB.appendChild(s);
+    }
+    panel.appendChild(rowA);
+    panel.appendChild(opEl);
+    panel.appendChild(rowB);
+  } else {
+    // subtraction: first (a-b) items normal, last b items crossed out
+    const row = document.createElement('div');
+    row.className = 'wp-hint-row';
+    const keep = q.a - q.b;
+    for (let i = 0; i < Math.min(q.a, cap); i++) {
+      const s = document.createElement('span');
+      s.textContent = q.emoji;
+      if (i >= keep) s.className = 'wp-crossed';
+      row.appendChild(s);
+    }
+    panel.appendChild(row);
   }
 }
 
