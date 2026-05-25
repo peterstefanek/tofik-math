@@ -4,7 +4,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**Tofík a cesta ku hviezdam** is a single-file Progressive Web App (PWA) — an educational math game for Slovak first-graders. All application code lives in one file: `index.html`.
+**Tofík a cesta ku hviezdam** is a Progressive Web App (PWA) — an educational math game for Slovak first-graders.
+
+> **Game rules & mechanics are documented in [`RULES.md`](RULES.md). Keep it up to date whenever you change question types, scoring, sensors, sounds, or localStorage keys.**
 
 ## Running Locally
 
@@ -24,14 +26,17 @@ Then open `http://localhost:8000/index.html`.
 
 | File | Purpose |
 |------|---------|
-| `index.html` | Entire application (HTML + CSS + JS, ~3,000 lines) |
+| `index.html` | HTML structure (~150 lines) |
+| `styles.css` | All CSS (~1 290 lines) |
+| `app.js` | All JavaScript (~1 775 lines) |
 | `manifest.json` | PWA manifest (name, icons, display mode, orientation) |
-| `service-worker.js` | Cache-first offline strategy, cache key `tofik-v1` |
+| `service-worker.js` | Cache-first offline strategy, current cache key `tofik-v3` |
 | `icon.svg` | App icon (fox face, maskable, 512×512) |
+| `RULES.md` | Game rules, mechanics, question types — keep in sync with code |
 
 ## Architecture
 
-The app is a **screen-based SPA** with no client-side router. All state lives in a single `state` object; screens are CSS `display`-toggled via `showScreen()`.
+The app is a **screen-based SPA** with no client-side router. All state lives in a single `state` object in `app.js`; screens are CSS `display`-toggled via `showScreen()`.
 
 ### Key JavaScript Systems
 
@@ -70,7 +75,7 @@ The app is a **screen-based SPA** with no client-side router. All state lives in
 
 ## Updating the Service Worker Cache
 
-When adding new files (images, fonts, etc.), add them to the `CACHE_FILES` array in `service-worker.js`. Bump the `CACHE_NAME` version string (`tofik-v1` → `tofik-v2`) so old caches are cleared on next visit.
+When adding new files (images, fonts, etc.), add them to the `APP_SHELL` array in `service-worker.js`. Bump the `CACHE_NAME` version string (e.g. `tofik-v3` → `tofik-v4`) so old caches are cleared on next visit.
 
 ## Language
 

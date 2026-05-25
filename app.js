@@ -1299,9 +1299,16 @@ async function renderRozkladShake(q, visual) {
             b.settled = true;
             b.vx = 0; b.vy = 0;
             audio.play('bean-drop');
-            // Nudge into nearest basket horizontally
             const dest = b.x < MIDLINE ? 'L' : 'R';
             b.basket = dest;
+            // Clamp bean inside its basket's visual bounds (baskets: 45% wide, left@2%, right@2%)
+            const HALF_BEAN = 13;
+            const safeL = { min: W * 0.04 + HALF_BEAN, max: W * 0.47 - HALF_BEAN };
+            const safeR = { min: W * 0.53 + HALF_BEAN, max: W * 0.94 - HALF_BEAN };
+            const bounds = dest === 'L' ? safeL : safeR;
+            b.x = Math.max(bounds.min, Math.min(bounds.max, b.x));
+            b.el.style.transition = 'left 0.15s ease';
+            b.el.style.left = b.x + 'px';
           }
         }
         b.el.style.left = b.x + 'px';
