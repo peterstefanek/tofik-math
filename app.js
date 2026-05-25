@@ -101,7 +101,7 @@ function questionLabel(q) {
     case 'sequence':     return q.seq.map((n, i) => i === q.pos ? '?' : n).join(', ');
     case 'rozklad20':    return `10 + ? = ${q.total}`;
     case 'seqstep':      return q.seq.map((n, i) => i === q.pos ? '?' : n).join(', ');
-    case 'peniaze':      return `Spočítaj: ${q.items.map(i => i.val+'€').join(' + ')}`;
+    case 'peniaze':      return `Prasiatko: ${q.items.map(i=>i.val+'€').join('+')} = ${q.total}€`;
     case 'wordproblem':  return q.prompt;
     case 'magic':        return 'Magický štvorec';
   }
@@ -1017,7 +1017,7 @@ function generateOne(type, tier = null) {
       if (items.length < 2) { items = [{ val:2, isNote:false }, { val:5, isNote:true }]; total = 7; }
       return {
         type, answer: total,
-        prompt: 'Koľko eur je tu spolu?',
+        prompt: 'Koľko eur máš v prasiatku?',
         items, total,
         options: makeOptions(total, 1, 20),
       };
@@ -1245,16 +1245,8 @@ function renderQuestion() {
       break;
     }
     case 'peniaze': {
-      const wrap = document.createElement('div');
-      wrap.className = 'peniaze-wrap';
-      q.items.forEach(item => {
-        const el = document.createElement('div');
-        el.className = item.isNote ? 'note-item' : 'coin-item';
-        el.textContent = item.val + '€';
-        wrap.appendChild(el);
-      });
-      visual.appendChild(wrap);
-      renderAnswerButtons(q.options, q.answer);
+      renderPeniazeScatter(q, visual);
+      // answer buttons rendered after scatter completes
       break;
     }
     case 'wordproblem': {
@@ -1646,6 +1638,116 @@ async function renderRozkladShake(q, visual) {
   const perm = await requestSensorPermission();
   if (perm === 'granted') {
     startShakeListener(scatter);
+  }
+}
+
+// ========== PENIAZE PIGGY BANK SCATTER ==========
+function renderPeniazeScatter(q, visual) {
+  const wrap = document.createElement('div');
+  wrap.className = 'peniaze-scatter-wrap';
+  wrap.innerHTML = `
+    <div class="piggy-stage" id="piggy-stage">
+      <div class="piggy-bank" id="piggy-bank">🐷</div>
+    </div>
+    <div class="piggy-instruction" id="piggy-instruction">Klikni na prasiatko! 👆</div>
+  `;
+  visual.appendChild(wrap);
+
+  const stage     = document.getElementById('piggy-stage');
+  const piggyEl   = document.getElementById('piggy-bank');
+  const instrEl   = document.getElementById('piggy-instruction');
+  let broken = false;
+
+  piggyEl.addEventListener('click', () => {
+    if (broken) return;
+    broken = true;
+    audio.play('pop');
+    if (navigator.vibrate) navigator.vibrate([30, 60, 80]);
+    piggyEl.classList.add('piggy-breaking');
+    setTimeout(() => {
+      piggyEl.textContent = '💥';
+      piggyEl.classList.remove('piggy-breaking');
+      instrEl.textContent = 'Spočítaj všetky peniaze!';
+      setTimeout(() => {
+        piggyEl.style.display = 'none';
+        scatterCoins();
+      }, 320);
+    }, 380);
+  });
+
+  function scatterCoins() {
+    const stageW = () => stage.clientWidth;
+    const stageH = () => stage.clientHeight;
+    const cx = stageW() / 2;
+    const cy = stageH() / 2;
+    const items = [];
+
+    // Half-sizes for collision (centered positioning via translate(-50%,-50%))
+    const HW = { coin1: 18, coin2: 25, note5: 36, note10: 44 };
+    const HH = { coin1: 18, coin2: 25, note5: 19, note10: 23 };
+
+    q.items.forEach((item, idx) => {
+      const key = item.isNote ? `note${item.val}` : `coin${item.val}`;
+      const el = document.createElement('div');
+      el.className = `peniaze-fly ${item.isNote ? `note-fly note-val-${item.val}` : `coin-fly coin-val-${item.val}`}`;
+      el.textContent = item.val + '€';
+      el.style.left = cx + 'px';
+      el.style.top = (cy - 10) + 'px';
+      stage.appendChild(el);
+
+      const angle = (idx / q.items.length) * Math.PI * 2 + (Math.random() - 0.5) * 1.4;
+      const speed = 5 + Math.random() * 7;
+      items.push({
+        el, x: cx, y: cy - 10,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed - 5,
+        hw: HW[key] ?? 25,
+        hh: HH[key] ?? 25,
+        settled: false,
+      });
+    });
+
+    const GRAVITY = 0.45;
+    const FRICTION = 0.84;
+    const RESTITUTION = 0.32;
+    let buttonsShown = false;
+    const showButtons = () => { if (!buttonsShown) { buttonsShown = true; renderAnswerButtons(q.options, q.answer); } };
+    // Safety: force-show buttons after 3 s even if physics hasn't settled
+    const fallback = setTimeout(showButtons, 3000);
+
+    function step() {
+      let active = 0;
+      const W = stageW();
+      const H = stageH();
+      items.forEach(b => {
+        if (b.settled) return;
+        b.vy += GRAVITY;
+        b.x  += b.vx;
+        b.y  += b.vy;
+        const FLOOR = H - b.hh;
+        if (b.x < b.hw)     { b.x = b.hw;     b.vx = -b.vx * RESTITUTION; }
+        if (b.x > W - b.hw) { b.x = W - b.hw; b.vx = -b.vx * RESTITUTION; }
+        if (b.y >= FLOOR) {
+          b.y  = FLOOR;
+          b.vy = -b.vy * RESTITUTION;
+          b.vx *= FRICTION;
+          if (Math.abs(b.vy) < 1 && Math.abs(b.vx) < 0.5) {
+            b.settled = true;
+            audio.play('bean-drop');
+          }
+        }
+        b.el.style.left = b.x + 'px';
+        b.el.style.top  = b.y + 'px';
+        if (!b.settled) active++;
+      });
+      if (active > 0) {
+        requestAnimationFrame(step);
+      } else {
+        clearTimeout(fallback);
+        setTimeout(showButtons, 450);
+      }
+    }
+    requestAnimationFrame(step);
   }
 }
 

@@ -665,36 +665,96 @@
   /* ========== POKROCILE — NEW QUESTION TYPES ========== */
 
   /* peniaze */
-  .peniaze-wrap {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-    justify-content: center;
-    align-items: center;
-    padding: 8px 0;
+  /* ========== PENIAZE — PIGGY BANK SCATTER ========== */
+  .peniaze-scatter-wrap {
+    width: 100%;
+    max-width: 360px;
+    margin: 0 auto;
   }
-  .coin-item, .note-item {
+  .piggy-stage {
+    position: relative;
+    height: 230px;
+    background: linear-gradient(to bottom, rgba(255,255,255,0.3), rgba(212,232,184,0.2));
+    border-radius: 18px;
+    overflow: hidden;
+    border: 2px dashed rgba(107,90,69,0.3);
+    cursor: pointer;
+  }
+  .piggy-bank {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 88px;
+    cursor: pointer;
+    user-select: none;
+    transition: transform 0.1s;
+  }
+  .piggy-bank:active { transform: translate(-50%, -50%) scale(0.92); }
+  .piggy-breaking {
+    animation: piggy-shake 0.38s ease;
+  }
+  @keyframes piggy-shake {
+    0%   { transform: translate(-50%,-50%) rotate(0)    scale(1);    }
+    20%  { transform: translate(-50%,-50%) rotate(-18deg) scale(1.12); }
+    40%  { transform: translate(-50%,-50%) rotate(18deg)  scale(1.18); }
+    60%  { transform: translate(-50%,-50%) rotate(-12deg) scale(1.12); }
+    80%  { transform: translate(-50%,-50%) rotate(8deg)   scale(1.06); }
+    100% { transform: translate(-50%,-50%) rotate(0)    scale(1);    }
+  }
+  .piggy-instruction {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--c-ink-soft);
+    text-align: center;
+    margin-top: 8px;
+    min-height: 22px;
+  }
+  /* scattered coin / note base */
+  .peniaze-fly {
+    position: absolute;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 22px;
     font-weight: 700;
     color: var(--c-ink);
-    box-shadow: 0 3px 0 var(--c-shadow-soft), 0 5px 12px var(--c-shadow);
+    transform: translate(-50%, -50%);
+    transition: none;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.22), inset 0 1px 2px rgba(255,255,255,0.4);
   }
-  .coin-item {
-    width: 68px;
-    height: 68px;
+  /* 1 € — smaller gold coin */
+  .coin-fly.coin-val-1 {
+    width: 36px; height: 36px;
     border-radius: 50%;
-    background: #f7c948;
-    border: 4px solid #e5a800;
+    font-size: 11px;
+    background: radial-gradient(circle at 35% 30%, #ffe066 0%, #c89000 100%);
+    border: 2px solid #a87000;
   }
-  .note-item {
-    width: 88px;
-    height: 52px;
-    border-radius: 10px;
-    background: #6ec97a;
-    border: 4px solid #43a355;
+  /* 2 € — larger coin, gold centre + silver rim */
+  .coin-fly.coin-val-2 {
+    width: 50px; height: 50px;
+    border-radius: 50%;
+    font-size: 13px;
+    background: radial-gradient(circle at 35% 30%, #ffe899 0%, #d4a000 70%, #888 100%);
+    border: 3px solid #aaa;
+    box-shadow: 0 0 0 2px #d4a000, 0 4px 8px rgba(0,0,0,0.25);
+  }
+  /* 5 € — green banknote */
+  .note-fly.note-val-5 {
+    width: 72px; height: 38px;
+    border-radius: 6px;
+    font-size: 13px;
+    background: linear-gradient(135deg, #81c784 0%, #388e3c 100%);
+    border: 2px solid #2e7d32;
+    color: #fff;
+  }
+  /* 10 € — blue banknote, slightly bigger */
+  .note-fly.note-val-10 {
+    width: 88px; height: 46px;
+    border-radius: 6px;
+    font-size: 13px;
+    background: linear-gradient(135deg, #64b5f6 0%, #1565c0 100%);
+    border: 2px solid #0d47a1;
+    color: #fff;
   }
 
   /* wordproblem */
