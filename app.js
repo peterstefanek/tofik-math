@@ -1212,7 +1212,8 @@ async function renderCompareScale(q, visual) {
 
   // Try sensors in parallel
   const perm = await requestSensorPermission();
-  if (perm === 'granted') {
+  // Guard: user may have already answered via fallback buttons while we awaited permission
+  if (perm === 'granted' && !done) {
     audio.tiltStart();
     startTiltListener((gamma) => {
       // Visualize phone tilt directly (gamma negative = left)
