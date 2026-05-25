@@ -20,6 +20,16 @@ const state = {
   currentQuestions: [],
 };
 
+// Per-mode ordered question types (index = level index)
+const LEVEL_TYPES = {
+  do10:     ['count','add5','rozklad','compare','add10','sequence'],
+  do20:     ['count','add5','rozklad','compare','add10','sequence','addsub20'],
+  pokrocile:['compare','rozklad20','seqstep','addsub20','peniaze','wordproblem','magic'],
+};
+function getLevelType(idx) {
+  return (LEVEL_TYPES[state.mode] ?? LEVEL_TYPES.do20)[idx];
+}
+
 const QUESTIONS_PER_LEVEL = 4;
 
 // ========== PETS ==========
@@ -46,13 +56,18 @@ const AUDIO_KEY = 'tofik-audio-v1';
 const STATS_CAP = 200;
 
 const SKILL_INFO = {
-  count:    { icon: '🌼', name: 'Počítanie' },
-  add5:     { icon: '🍎', name: 'Sčítanie do 5' },
-  rozklad:  { icon: '💧', name: 'Rozklad čísel' },
-  compare:  { icon: '🐟', name: 'Porovnávanie' },
-  add10:    { icon: '🐻', name: 'Sčítanie do 10' },
-  sequence: { icon: '⛰️', name: 'Postupnosti' },
-  addsub20: { icon: '🌟', name: '+ a − do 20' },
+  count:      { icon: '🌼', name: 'Počítanie' },
+  add5:       { icon: '🍎', name: 'Sčítanie do 5' },
+  rozklad:    { icon: '💧', name: 'Rozklad čísel' },
+  compare:    { icon: '🐟', name: 'Porovnávanie' },
+  add10:      { icon: '🐻', name: 'Sčítanie do 10' },
+  sequence:   { icon: '⛰️', name: 'Postupnosti' },
+  addsub20:   { icon: '🌟', name: '+ a − do 20' },
+  rozklad20:  { icon: '💧', name: 'Rozklad do 20' },
+  seqstep:    { icon: '🔢', name: 'Postupnosti s krokom' },
+  peniaze:    { icon: '🪙', name: 'Počítanie peňazí' },
+  wordproblem:{ icon: '📖', name: 'Slovné úlohy' },
+  magic:      { icon: '✨', name: 'Magický štvorec' },
 };
 
 // Live tracking of current question
@@ -79,9 +94,14 @@ function questionLabel(q) {
       if (slot === 'a')      return `? ${q.op} ${q.b} = ${q.sum}`;
       return `${q.a} ${q.op} ? = ${q.sum}`;
     }
-    case 'compare':  return `${q.a} ⚖ ${q.b}`;
-    case 'rozklad':  return `${q.part} + ? = ${q.total}`;
-    case 'sequence': return q.seq.map((n, i) => i === q.pos ? '?' : n).join(', ');
+    case 'compare':      return `${q.a} ⚖ ${q.b}`;
+    case 'rozklad':      return `${q.part} + ? = ${q.total}`;
+    case 'sequence':     return q.seq.map((n, i) => i === q.pos ? '?' : n).join(', ');
+    case 'rozklad20':    return `10 + ? = ${q.total}`;
+    case 'seqstep':      return q.seq.map((n, i) => i === q.pos ? '?' : n).join(', ');
+    case 'peniaze':      return `Spočítaj: ${q.items.map(i => i.val+'€').join(' + ')}`;
+    case 'wordproblem':  return q.prompt;
+    case 'magic':        return `Magický štvorec (sum=${q.sum})`;
   }
   return q.type;
 }
@@ -307,7 +327,7 @@ function loadState() {
     if (data.pet && typeof data.pet.species === 'string' && typeof data.pet.name === 'string') {
       state.pet = data.pet;
     }
-    if (data.mode === 'do10' || data.mode === 'do20') state.mode = data.mode;
+    if (data.mode === 'do10' || data.mode === 'do20' || data.mode === 'pokrocile') state.mode = data.mode;
     if (typeof data.totalStars === 'number') state.totalStars = data.totalStars;
     if (Array.isArray(data.levels)) {
       data.levels.forEach((saved, i) => {
@@ -671,13 +691,18 @@ function renderMap() {
 
 // ========== QUESTION GENERATION ==========
 const EMOJI_BY_LEVEL = {
-  count: ['🍎','🌻','🐝','🍓','⭐','🦋','🍄','🌸'],
-  add5: ['🍎','🐝','🌻','🍓'],
-  rozklad: ['💧','🌟','🍓','🐝'],
-  compare: ['🐟','🐸','🦆','🐢'],
-  add10: ['🍪','🌰','🍇','🥕'],
-  sequence: [],
-  addsub20: ['🌟','💎','🍒','🍬'],
+  count:       ['🍎','🌻','🐝','🍓','⭐','🦋','🍄','🌸'],
+  add5:        ['🍎','🐝','🌻','🍓'],
+  rozklad:     ['💧','🌟','🍓','🐝'],
+  compare:     ['🐟','🐸','🦆','🐢'],
+  add10:       ['🍪','🌰','🍇','🥕'],
+  sequence:    [],
+  addsub20:    ['🌟','💎','🍒','🍬'],
+  rozklad20:   ['🍓','🌟','💧','🐝'],
+  seqstep:     [],
+  peniaze:     [],
+  wordproblem: [],
+  magic:       [],
 };
 
 function rand(n) { return Math.floor(Math.random() * n); }
@@ -787,6 +812,28 @@ function difficultyTier(type) {
   return 0;
 }
 
+// ========== WORD PROBLEMS BANK ==========
+const WORD_PROBLEMS = [
+  { text: (a,b) => `Tomáš má ${a} keksíkov. Dostal ešte ${b}. Koľko má spolu?`,          a:()=>5+rand(7),  b:()=>2+rand(6),  op:'+' },
+  { text: (a,b) => `Jana má ${a} ceruziek. Dala ${b} kamarátke. Koľko jej ostalo?`,       a:()=>8+rand(8),  b:()=>2+rand(6),  op:'-' },
+  { text: (a,b) => `V záhrade je ${a} jabĺk a ${b} hrušiek. Koľko ovocia je spolu?`,      a:()=>4+rand(8),  b:()=>3+rand(7),  op:'+' },
+  { text: (a,b) => `Na strome sedelo ${a} vtákov. Odletelo ${b}. Koľko zostalo?`,         a:()=>10+rand(8), b:()=>3+rand(7),  op:'-' },
+  { text: (a,b) => `Mama upiekla ${a} buchiet. Ocko zjedol ${b}. Koľko buchiet ostalo?`,  a:()=>10+rand(7), b:()=>2+rand(6),  op:'-' },
+  { text: (a,b) => `Vo fľaši bolo ${a} guličiek. Pridal som ${b}. Koľko ich je?`,         a:()=>6+rand(9),  b:()=>2+rand(6),  op:'+' },
+  { text: (a,b) => `Peter má ${a} nálepiek. Zdenko má o ${b} menej. Koľko má Zdenko?`,    a:()=>10+rand(8), b:()=>2+rand(7),  op:'-' },
+  { text: (a,b) => `Anička nazbierala ${a} gaštanov. Zošla ešte ${b}. Koľko ich má?`,     a:()=>5+rand(9),  b:()=>2+rand(7),  op:'+' },
+];
+
+// ========== MAGIC SQUARES BANK (row-major, all rows+cols sum to `sum`) ==========
+const MAGIC_SQUARES = [
+  { grid: [2,7,6, 9,5,1, 4,3,8], sum: 15 },
+  { grid: [6,1,8, 7,5,3, 2,9,4], sum: 15 },
+  { grid: [4,9,2, 3,5,7, 8,1,6], sum: 15 },
+  { grid: [8,3,4, 1,5,9, 6,7,2], sum: 15 },
+  { grid: [12,4,2, 1,3,14, 5,11,2], sum: 18 },
+  { grid: [1,6,5, 8,4,0, 3,2,7], sum: 12 },
+];
+
 function generateQuestions(type) {
   const baseTier = difficultyTier(type);
   const qs = [];
@@ -839,13 +886,15 @@ function generateOne(type, tier = null) {
     }
     case 'compare': {
       let a, b;
-      if (tier <= -1) {
+      const isPokrocile = state.mode === 'pokrocile';
+      if (tier <= -1 && !isPokrocile) {
         do { a = 1 + rand(6); b = 1 + rand(6); } while (a === b || Math.abs(a - b) < 3);
         return { type, variant: 'tap', answer: a > b ? 'L' : 'R', emoji, prompt: 'Kde je viac?', a, b };
       }
-      const maxN = tier === 0 ? 8 : tier === 1 ? 9 : 10;
+      const maxN = isPokrocile ? 18 : (tier === 0 ? 8 : tier === 1 ? 9 : 10);
       do { a = 1 + rand(maxN); b = 1 + rand(maxN); } while (a === b);
-      const tapChance = tier === 1 ? 3 : tier >= 2 ? 0 : 5;
+      // pokrocile: only tap (numbers too large for physical scale metaphor)
+      const tapChance = isPokrocile ? 10 : (tier === 1 ? 3 : tier >= 2 ? 0 : 5);
       const variant = rand(10) < tapChance ? 'tap' : 'scale';
       return {
         type, variant, answer: a > b ? 'L' : 'R', emoji,
@@ -924,6 +973,80 @@ function generateOne(type, tier = null) {
         options: makeOptions(answer, 0, 20),
       };
     }
+    case 'seqstep': {
+      const step = tier <= 0 ? 2 : tier === 1 ? 2 + rand(2) : 3 + rand(2); // tier 0→2, tier 1→2-3, tier 2→3-4
+      const maxStart = 20 - 4 * step;
+      const start = 1 + rand(Math.max(1, maxStart));
+      const pos = 1 + rand(3); // gap at index 1, 2, or 3 (never 0)
+      const seq = [start, start+step, start+2*step, start+3*step, start+4*step];
+      const answer = seq[pos];
+      return {
+        type, answer,
+        prompt: 'Aké číslo chýba?',
+        seq, pos, step,
+        options: makeOptions(answer, 1, 20),
+      };
+    }
+    case 'rozklad20': {
+      const total = 11 + rand(10); // 11..20
+      const part = 10;
+      const answer = total - 10;
+      return {
+        type, variant: 'tree', answer, emoji,
+        prompt: `Koľko chýba do ${total}?`,
+        total, part,
+        options: makeOptions(answer, 0, 10),
+      };
+    }
+    case 'peniaze': {
+      const COINS = [1, 2];
+      const NOTES = [5, 10];
+      let items = [];
+      let total = 0;
+      const count = 2 + rand(3); // 2-4 items
+      let safety = 0;
+      while (items.length < count && safety < 30) {
+        const isNote = rand(2) === 0 && items.length > 0; // at least one coin first
+        const pool = isNote ? NOTES : COINS;
+        const val = pool[rand(pool.length)];
+        if (total + val <= 20) { items.push({ val, isNote }); total += val; }
+        safety++;
+      }
+      if (items.length < 2) { items = [{ val:2, isNote:false }, { val:5, isNote:true }]; total = 7; }
+      return {
+        type, answer: total,
+        prompt: 'Koľko eur je tu spolu?',
+        items, total,
+        options: makeOptions(total, 1, 20),
+      };
+    }
+    case 'wordproblem': {
+      const t = WORD_PROBLEMS[rand(WORD_PROBLEMS.length)];
+      let a, b;
+      let safety = 0;
+      do {
+        a = t.a(); b = t.b();
+        safety++;
+      } while (safety < 20 && (t.op === '+' ? a + b > 20 : a - b < 0 || a - b > 20));
+      const sum = t.op === '+' ? a + b : a - b;
+      return {
+        type, answer: sum,
+        prompt: t.text(a, b),
+        a, b, sum, op: t.op,
+        options: makeOptions(sum, 0, 20),
+      };
+    }
+    case 'magic': {
+      const ms = MAGIC_SQUARES[rand(MAGIC_SQUARES.length)];
+      const blankPos = rand(9);
+      const answer = ms.grid[blankPos];
+      return {
+        type, answer,
+        prompt: `Aké číslo chýba? (Súčet v každom riadku a stĺpci je ${ms.sum})`,
+        grid: ms.grid, blankPos, sum: ms.sum,
+        options: makeOptions(answer, 0, 14),
+      };
+    }
   }
 }
 
@@ -962,7 +1085,7 @@ function startLevel(idx) {
   state.questionIdx = 0;
   state.mistakesInLevel = 0;
   state.inBonus = false;
-  state.currentQuestions = generateQuestions(state.levels[idx].type);
+  state.currentQuestions = generateQuestions(getLevelType(idx));
   showScreen('level');
   renderQuestion();
 }
@@ -1024,11 +1147,20 @@ function renderQuestion() {
         wrap.className = 'compare-groups';
         const L = document.createElement('div');
         L.className = 'compare-group';
-        L.innerHTML = q.emoji.repeat(q.a);
+        // For large numbers (pokrocile) show just the numeral, not an emoji grid
+        if (q.a > 10) {
+          L.innerHTML = `<span class="compare-big-num">${q.a}</span>`;
+        } else {
+          L.innerHTML = q.emoji.repeat(q.a);
+        }
         L.addEventListener('click', () => handleCompare(L, 'L', q.answer));
         const R = document.createElement('div');
         R.className = 'compare-group right';
-        R.innerHTML = q.emoji.repeat(q.b);
+        if (q.b > 10) {
+          R.innerHTML = `<span class="compare-big-num">${q.b}</span>`;
+        } else {
+          R.innerHTML = q.emoji.repeat(q.b);
+        }
         R.addEventListener('click', () => handleCompare(R, 'R', q.answer));
         wrap.appendChild(L); wrap.appendChild(R);
         visual.appendChild(wrap);
@@ -1036,6 +1168,7 @@ function renderQuestion() {
       // No answer buttons (compare uses groups themselves)
       break;
     }
+    case 'seqstep':
     case 'sequence': {
       const row = document.createElement('div');
       row.className = 'sequence-row';
@@ -1049,12 +1182,16 @@ function renderQuestion() {
       renderAnswerButtons(q.options, q.answer);
       break;
     }
+    case 'rozklad20':
     case 'rozklad': {
       if (q.variant === 'shake') {
         renderRozkladShake(q, visual);
       } else {
         const tree = document.createElement('div');
         tree.className = 'rozklad-tree';
+        // rozklad20: show dots only up to 10 to avoid overflow
+        const dotCountLeft = Math.min(10, q.part);
+        const dotCountRight = Math.min(3, q.total - q.part);
         tree.innerHTML = `
           <div class="rozklad-top">${q.total}</div>
           <svg class="rozklad-lines" viewBox="0 0 200 30" preserveAspectRatio="none" aria-hidden="true">
@@ -1064,11 +1201,11 @@ function renderQuestion() {
           <div class="rozklad-branches">
             <div class="rozklad-part">
               <div class="part-num">${q.part}</div>
-              <div class="part-dots">${q.emoji.repeat(q.part)}</div>
+              <div class="part-dots">${q.emoji.repeat(dotCountLeft)}</div>
             </div>
             <div class="rozklad-part unknown">
               <div class="part-num">?</div>
-              <div class="part-dots">${'❓'.repeat(Math.min(3, q.total - q.part))}</div>
+              <div class="part-dots">${'❓'.repeat(dotCountRight)}</div>
             </div>
           </div>
         `;
@@ -1101,6 +1238,38 @@ function renderQuestion() {
         }
         visual.appendChild(dots);
       }
+      renderAnswerButtons(q.options, q.answer);
+      break;
+    }
+    case 'peniaze': {
+      const wrap = document.createElement('div');
+      wrap.className = 'peniaze-wrap';
+      q.items.forEach(item => {
+        const el = document.createElement('div');
+        el.className = item.isNote ? 'note-item' : 'coin-item';
+        el.textContent = item.val + '€';
+        wrap.appendChild(el);
+      });
+      visual.appendChild(wrap);
+      renderAnswerButtons(q.options, q.answer);
+      break;
+    }
+    case 'wordproblem': {
+      prompt.classList.add('wordproblem-prompt');
+      // visual stays empty — the story is the prompt itself
+      renderAnswerButtons(q.options, q.answer);
+      break;
+    }
+    case 'magic': {
+      const grid = document.createElement('div');
+      grid.className = 'magic-grid';
+      q.grid.forEach((num, i) => {
+        const cell = document.createElement('div');
+        cell.className = 'magic-cell' + (i === q.blankPos ? ' magic-blank' : '');
+        cell.textContent = i === q.blankPos ? '?' : num;
+        grid.appendChild(cell);
+      });
+      visual.appendChild(grid);
       renderAnswerButtons(q.options, q.answer);
       break;
     }

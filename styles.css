@@ -86,6 +86,11 @@
     width: 100%;
     max-width: 380px;
   }
+  .diff-cards .diff-card:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+    max-width: 180px;
+    justify-self: center;
+  }
   .diff-card {
     background: var(--c-cream);
     border: none;
@@ -107,6 +112,7 @@
   }
   .diff-card.do10 .diff-num { color: var(--c-green); }
   .diff-card.do20 .diff-num { color: var(--c-accent); }
+  .diff-card.pokrocile .diff-num { color: #f59e0b; font-size: 48px; }
   .diff-num {
     font-size: 64px;
     font-weight: 700;
@@ -650,6 +656,89 @@
     text-decoration: line-through;
     text-decoration-color: var(--c-accent-2);
     text-decoration-thickness: 2.5px;
+  }
+
+  /* ========== POKROCILE — NEW QUESTION TYPES ========== */
+
+  /* peniaze */
+  .peniaze-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: center;
+    align-items: center;
+    padding: 8px 0;
+  }
+  .coin-item, .note-item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--c-ink);
+    box-shadow: 0 3px 0 var(--c-shadow-soft), 0 5px 12px var(--c-shadow);
+  }
+  .coin-item {
+    width: 68px;
+    height: 68px;
+    border-radius: 50%;
+    background: #f7c948;
+    border: 4px solid #e5a800;
+  }
+  .note-item {
+    width: 88px;
+    height: 52px;
+    border-radius: 10px;
+    background: #6ec97a;
+    border: 4px solid #43a355;
+  }
+
+  /* wordproblem */
+  .wordproblem-prompt {
+    font-size: 20px !important;
+    line-height: 1.5 !important;
+    text-align: center;
+    padding: 0 8px;
+  }
+
+  /* magic square */
+  .magic-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    max-width: 240px;
+    margin: 0 auto;
+  }
+  .magic-cell {
+    width: 68px;
+    height: 68px;
+    border-radius: 14px;
+    background: var(--c-cream);
+    border: 3px solid var(--c-shadow-soft);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--c-ink);
+    box-shadow: 0 3px 0 var(--c-shadow-soft);
+  }
+  .magic-cell.magic-blank {
+    background: rgba(255,140,66,0.18);
+    border-color: var(--c-accent);
+    border-style: dashed;
+    color: var(--c-accent);
+    animation: pulse-soft 1.5s ease-in-out infinite;
+  }
+
+  /* compare big numbers (pokrocile, values > 10) */
+  .compare-big-num {
+    font-size: 52px;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--c-ink);
+    display: block;
+    text-align: center;
   }
 
   /* ========== SCALE (tilt balance) ========== */

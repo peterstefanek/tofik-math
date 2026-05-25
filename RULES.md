@@ -6,7 +6,7 @@ Tento dokument popisuje herné pravidlá, mechaniky a pedagogický zámer hry. *
 
 ## Základný tok hry
 
-1. Hráč vyberie obtiažnosť (**do 10** alebo **do 20**)
+1. Hráč vyberie obtiažnosť (**do 10**, **do 20** alebo **Pokročilé**)
 2. Vyberie zvieratko a zadá mu meno
 3. Prechádza levelmi po mape (vždy len jeden odomknutý naraz)
 4. V každom leveli odpovie na 4 otázky
@@ -21,6 +21,7 @@ Tento dokument popisuje herné pravidlá, mechaniky a pedagogický zámer hry. *
 |-----|--------|------------|-----------|
 | **do 10** | 6 | 18 | count, add5, rozklad, compare, add10, sequence |
 | **do 20** | 7 | 21 | + addsub20 (7. level) |
+| **pokrocile** | 7 | 21 | compare(1-18), rozklad20, seqstep, addsub20, peniaze, wordproblem, magic |
 
 ---
 
