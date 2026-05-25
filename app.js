@@ -5,16 +5,17 @@ const state = {
   questionIdx: 0,
   mistakesInLevel: 0,
   totalStars: 0,
+  inBonus: false,
   pet: { species: 'fox', name: 'Tofík' },
   mode: null, // 'do10' | 'do20' — null until chosen
   levels: [
-    { id: 0, name: 'Lúka',     icon: '🌼', x: 20, y: 92, type: 'count',    done: false, stars: 0 },
-    { id: 1, name: 'Sad',      icon: '🍎', x: 72, y: 80, type: 'add5',     done: false, stars: 0 },
-    { id: 2, name: 'Vodopád',  icon: '💧', x: 24, y: 67, type: 'rozklad',  done: false, stars: 0 },
-    { id: 3, name: 'Jazierko', icon: '🐟', x: 72, y: 54, type: 'compare',  done: false, stars: 0 },
-    { id: 4, name: 'Jaskyňa',  icon: '🐻', x: 24, y: 41, type: 'add10',    done: false, stars: 0 },
-    { id: 5, name: 'Vrchol',   icon: '⛰️', x: 72, y: 28, type: 'sequence', done: false, stars: 0 },
-    { id: 6, name: 'Hviezdy',  icon: '🌟', x: 32, y: 12, type: 'addsub20', done: false, stars: 0 },
+    { id: 0, name: 'Lúka',     icon: '🌼', x: 20, y: 92, type: 'count',    done: false, stars: 0, bonus: false },
+    { id: 1, name: 'Sad',      icon: '🍎', x: 72, y: 80, type: 'add5',     done: false, stars: 0, bonus: false },
+    { id: 2, name: 'Vodopád',  icon: '💧', x: 24, y: 67, type: 'rozklad',  done: false, stars: 0, bonus: false },
+    { id: 3, name: 'Jazierko', icon: '🐟', x: 72, y: 54, type: 'compare',  done: false, stars: 0, bonus: false },
+    { id: 4, name: 'Jaskyňa',  icon: '🐻', x: 24, y: 41, type: 'add10',    done: false, stars: 0, bonus: false },
+    { id: 5, name: 'Vrchol',   icon: '⛰️', x: 72, y: 28, type: 'sequence', done: false, stars: 0, bonus: false },
+    { id: 6, name: 'Hviezdy',  icon: '🌟', x: 32, y: 12, type: 'addsub20', done: false, stars: 0, bonus: false },
   ],
   currentQuestions: [],
 };
@@ -288,7 +289,7 @@ function saveState() {
     pet: state.pet,
     mode: state.mode,
     totalStars: state.totalStars,
-    levels: state.levels.map(l => ({ id: l.id, done: l.done, stars: l.stars })),
+    levels: state.levels.map(l => ({ id: l.id, done: l.done, stars: l.stars, bonus: l.bonus })),
   };
   try {
     localStorage.setItem(SAVE_KEY, JSON.stringify(data));
@@ -313,6 +314,7 @@ function loadState() {
         if (state.levels[i]) {
           state.levels[i].done = !!saved.done;
           state.levels[i].stars = saved.stars || 0;
+          state.levels[i].bonus = !!saved.bonus;
         }
       });
     }
@@ -596,7 +598,8 @@ function confirmResetStats() {
 function restartGame() {
   // Full reset: clear progress and stored state, return to difficulty choice
   state.totalStars = 0;
-  state.levels.forEach(l => { l.done = false; l.stars = 0; });
+  state.inBonus = false;
+  state.levels.forEach(l => { l.done = false; l.stars = 0; l.bonus = false; });
   state.mode = null;
   clearSavedState();
   showScreen('difficulty');
@@ -605,7 +608,8 @@ function restartGame() {
 function resetProgressOnly() {
   // Keep pet + mode, reset only progress
   state.totalStars = 0;
-  state.levels.forEach(l => { l.done = false; l.stars = 0; });
+  state.inBonus = false;
+  state.levels.forEach(l => { l.done = false; l.stars = 0; l.bonus = false; });
   saveState();
   renderMap();
 }
@@ -772,42 +776,59 @@ function stopAllSensors() {
   audio.tiltStop();
 }
 
+function difficultyTier(type) {
+  const t = stats.perType[type];
+  if (!t || t.count < 4) return 0;
+  const acc = 1 - t.mistakes / (t.count + t.mistakes);
+  if (acc < 0.50) return -1;
+  if (acc < 0.70) return  0;
+  if (acc < 0.85 && t.count >= 6)  return 1;
+  if (acc >= 0.85 && t.count >= 10) return 2;
+  return 0;
+}
+
 function generateQuestions(type) {
+  const baseTier = difficultyTier(type);
   const qs = [];
-  // Generate with mild deduplication so kid doesn't see same problem twice in a row
-  let lastSig = '';
-  let safety = 0;
-  while (qs.length < QUESTIONS_PER_LEVEL && safety < 40) {
-    const q = generateOne(type);
-    const sig = JSON.stringify({ a: q.a, b: q.b, answer: q.answer, pos: q.pos, total: q.total, part: q.part });
-    if (sig !== lastSig) {
-      qs.push(q);
-      lastSig = sig;
-    }
-    safety++;
+  for (let i = 0; i < QUESTIONS_PER_LEVEL; i++) {
+    const tier = i === QUESTIONS_PER_LEVEL - 1 ? Math.min(2, baseTier + 1) : baseTier;
+    let q, safety = 0;
+    const prevSig = qs.length > 0
+      ? JSON.stringify({ a: qs[qs.length-1].a, b: qs[qs.length-1].b, answer: qs[qs.length-1].answer, pos: qs[qs.length-1].pos, total: qs[qs.length-1].total, part: qs[qs.length-1].part })
+      : '';
+    do {
+      q = generateOne(type, tier);
+      safety++;
+    } while (
+      safety < 15 &&
+      prevSig === JSON.stringify({ a: q.a, b: q.b, answer: q.answer, pos: q.pos, total: q.total, part: q.part })
+    );
+    qs.push(q);
   }
-  while (qs.length < QUESTIONS_PER_LEVEL) qs.push(generateOne(type));
   return qs;
 }
 
-function generateOne(type) {
+function generateOne(type, tier = null) {
+  if (tier === null) tier = difficultyTier(type);
   const emoji = pick(EMOJI_BY_LEVEL[type] || ['⭐']);
   switch (type) {
     case 'count': {
-      const n = 2 + rand(7); // 2-8
+      const lo = tier <= -1 ? 2 : tier === 0 ? 2 : tier === 1 ? 3 : 5;
+      const hi = tier <= -1 ? 5 : tier === 0 ? 8 : tier === 1 ? 10 : 12;
+      const n = lo + rand(hi - lo + 1);
       return {
         type, answer: n, emoji,
         prompt: `Koľko ${pluralize(emoji)} vidíš?`,
         visual: emoji.repeat(n),
-        options: makeOptions(n, 1, 10),
+        options: makeOptions(n, 1, Math.max(14, n + 2)),
       };
     }
     case 'add5': {
-      const a = 1 + rand(4);
-      const b = 1 + rand(5 - a);
+      const a = tier <= -1 ? 1 + rand(2) : 1 + rand(4);
+      const b = tier <= -1 ? 1 + rand(2) : 1 + rand(5 - a);
       const sum = a + b;
-      // 60% standard (find result), 40% missing addend (split between a and b)
-      const slot = rand(10) < 6 ? 'result' : (rand(2) === 0 ? 'a' : 'b');
+      const resultChance = tier <= -1 ? 8 : tier === 0 ? 6 : tier === 1 ? 4 : 2;
+      const slot = rand(10) < resultChance ? 'result' : (rand(2) === 0 ? 'a' : 'b');
       const answer = slot === 'result' ? sum : (slot === 'a' ? a : b);
       return {
         type, slot, answer, emoji,
@@ -818,12 +839,14 @@ function generateOne(type) {
     }
     case 'compare': {
       let a, b;
-      do {
-        a = 1 + rand(8);
-        b = 1 + rand(8);
-      } while (a === b);
-      // 50/50 between tap variant and scale (tilt) variant
-      const variant = rand(2) === 0 ? 'tap' : 'scale';
+      if (tier <= -1) {
+        do { a = 1 + rand(6); b = 1 + rand(6); } while (a === b || Math.abs(a - b) < 3);
+        return { type, variant: 'tap', answer: a > b ? 'L' : 'R', emoji, prompt: 'Kde je viac?', a, b };
+      }
+      const maxN = tier === 0 ? 8 : tier === 1 ? 9 : 10;
+      do { a = 1 + rand(maxN); b = 1 + rand(maxN); } while (a === b);
+      const tapChance = tier === 1 ? 3 : tier >= 2 ? 0 : 5;
+      const variant = rand(10) < tapChance ? 'tap' : 'scale';
       return {
         type, variant, answer: a > b ? 'L' : 'R', emoji,
         prompt: variant === 'scale' ? 'Nakloň telefón k ťažšej strane!' : 'Kde je viac?',
@@ -831,10 +854,12 @@ function generateOne(type) {
       };
     }
     case 'add10': {
-      const a = 1 + rand(8);
-      const b = 1 + rand(Math.min(9, 10 - a));
+      const a = tier <= -1 ? 1 + rand(4) : 1 + rand(8);
+      const maxB = tier <= -1 ? Math.min(5, 10 - a) : Math.min(9, 10 - a);
+      const b = 1 + rand(Math.max(1, maxB));
       const sum = a + b;
-      const slot = rand(10) < 6 ? 'result' : (rand(2) === 0 ? 'a' : 'b');
+      const resultChance = tier <= -1 ? 8 : tier === 0 ? 6 : tier === 1 ? 4 : 2;
+      const slot = rand(10) < resultChance ? 'result' : (rand(2) === 0 ? 'a' : 'b');
       const answer = slot === 'result' ? sum : (slot === 'a' ? a : b);
       return {
         type, slot, answer, emoji,
@@ -844,50 +869,51 @@ function generateOne(type) {
       };
     }
     case 'sequence': {
-      const start = 1 + rand(5);
-      const pos = 1 + rand(3); // which one is blank (0..3, but not first)
-      const seq = [start, start+1, start+2, start+3, start+4];
+      const step = tier <= 0 ? 1 : tier === 1 ? (rand(2) === 0 ? 1 : 2) : (rand(2) === 0 ? 2 : 5);
+      const maxStart = tier <= -1 ? 3 : tier === 0 ? 5 : tier === 1 ? 8 : 10;
+      const start = 1 + rand(maxStart);
+      const pos = tier <= -1 ? 2 : 1 + rand(3);
+      const seq = [start, start+step, start+step*2, start+step*3, start+step*4];
       const answer = seq[pos];
       return {
         type, answer,
         prompt: 'Aké číslo chýba?',
         seq, pos,
-        options: makeOptions(answer, 1, 10),
+        options: makeOptions(answer, 1, Math.max(20, seq[4] + step)),
       };
     }
     case 'rozklad': {
-      // total 5..10, split into known part + missing part
-      const total = 5 + rand(6); // 5..10
-      const part = 1 + rand(total - 1); // 1..total-1
+      const minT = tier <= -1 ? 4 : tier === 0 ? 5 : tier === 1 ? 7 : 10;
+      const maxT = tier <= -1 ? 6 : tier === 0 ? 10 : tier === 1 ? 12 : 15;
+      const total = minT + rand(maxT - minT + 1);
+      const part = 1 + rand(total - 1);
       const answer = total - part;
-      // 50/50 between tree and shake (beans) variant
-      const variant = rand(2) === 0 ? 'tree' : 'shake';
+      const variant = tier <= -1 ? 'tree' : (rand(2) === 0 ? 'tree' : 'shake');
       return {
         type, variant, answer, emoji,
         prompt: variant === 'shake'
           ? `Zatras telefónom a rozhoď ${total} fazuľ!`
           : `Koľko chýba do ${total}?`,
         total, part,
-        options: makeOptions(answer, 0, 10),
+        options: makeOptions(answer, 0, total),
       };
     }
     case 'addsub20': {
-      // mix of add and subtract within 0..20, often crossing 10
-      const isAdd = rand(2) === 0;
-      // 65% standard, 35% missing slot (more conservative — these are harder)
+      const addChance = tier <= -1 ? 10 : tier === 0 ? 5 : tier === 1 ? 3 : 2;
+      const isAdd = rand(10) < addChance;
       const slot = rand(20) < 13 ? 'result' : (rand(2) === 0 ? 'a' : 'b');
       let a, b, sum;
       if (isAdd) {
-        // bias toward sums that cross 10
-        a = 5 + rand(11); // 5..15
+        const minA = tier <= -1 ? 5 : tier === 0 ? 5 : tier === 1 ? 8 : 10;
+        const maxA = tier <= -1 ? 12 : tier === 0 ? 15 : tier === 1 ? 16 : 17;
+        a = minA + rand(maxA - minA + 1);
         const maxB = Math.min(9, 20 - a);
-        b = 2 + rand(Math.max(1, maxB - 1));
+        b = maxB >= 2 ? 2 + rand(maxB - 1) : 1;
         sum = a + b;
       } else {
-        // a (minuend) 11..20, b (subtrahend) 2..9
-        a = 11 + rand(10); // 11..20
-        b = 2 + rand(8);   // 2..9
-        sum = a - b;       // result
+        a = 11 + rand(10);
+        b = 2 + rand(8);
+        sum = a - b;
       }
       const answer = slot === 'result' ? sum : (slot === 'a' ? a : b);
       const promptStandard = isAdd ? 'Spočítaj:' : 'Odpočítaj:';
@@ -1475,11 +1501,19 @@ function handleAnswer(btn, chosen, correct) {
     audio.play('wrong');
     recordWrongInAttempt(chosen);
     btn.classList.add('wrong');
-    state.mistakesInLevel++;
-    setTimeout(() => { btn.classList.remove('wrong'); btn.disabled = false; }, 600);
-    showFeedback('Skús ešte raz!', true);
-    // Hint: highlight the visual on count questions
-    highlightHint();
+    if (state.inBonus) {
+      setTimeout(() => {
+        btn.classList.remove('wrong');
+        state.inBonus = false;
+        finishLevel();
+      }, 700);
+      showFeedback('Nevadí, skúsiš to neskôr!', true);
+    } else {
+      state.mistakesInLevel++;
+      setTimeout(() => { btn.classList.remove('wrong'); btn.disabled = false; }, 600);
+      showFeedback('Skús ešte raz!', true);
+      highlightHint();
+    }
   }
 }
 
@@ -1496,9 +1530,18 @@ function handleCompare(group, side, correct) {
     audio.play('wrong');
     recordWrongInAttempt(side === 'L' ? 'vľavo' : 'vpravo');
     group.classList.add('wrong');
-    state.mistakesInLevel++;
-    setTimeout(() => group.classList.remove('wrong'), 600);
-    showFeedback('Skús ešte raz!', true);
+    if (state.inBonus) {
+      setTimeout(() => {
+        group.classList.remove('wrong');
+        state.inBonus = false;
+        finishLevel();
+      }, 700);
+      showFeedback('Nevadí, skúsiš to neskôr!', true);
+    } else {
+      state.mistakesInLevel++;
+      setTimeout(() => group.classList.remove('wrong'), 600);
+      showFeedback('Skús ešte raz!', true);
+    }
   }
 }
 
@@ -1522,12 +1565,59 @@ function showFeedback(text, isError = false) {
 
 function advance() {
   stopAllSensors();
+  if (state.inBonus) {
+    state.levels[state.levelIdx].bonus = true;
+    state.inBonus = false;
+    finishLevel();
+    return;
+  }
   state.questionIdx++;
   if (state.questionIdx >= QUESTIONS_PER_LEVEL) {
-    finishLevel();
+    if (state.mistakesInLevel === 0) {
+      showBonusPrompt();
+    } else {
+      finishLevel();
+    }
   } else {
     renderQuestion();
   }
+}
+
+function showBonusPrompt() {
+  document.getElementById('progress-fill').style.width = '100%';
+  document.getElementById('q-prompt').textContent = '🌟 Bonus!';
+  document.getElementById('q-visual').innerHTML = '';
+  const grid = document.getElementById('answer-grid');
+  grid.innerHTML = '';
+  const wrap = document.createElement('div');
+  wrap.className = 'bonus-prompt';
+  wrap.innerHTML = `
+    <div class="bonus-text">Zvládneš ťažšiu otázku?</div>
+    <button class="btn green" onclick="startBonusQuestion()">Áno, skúsim! 💪</button>
+    <button class="btn secondary" style="font-size:16px;padding:12px 22px;" onclick="finishLevel()">Preskočiť</button>
+  `;
+  grid.appendChild(wrap);
+  audio.play('pop');
+}
+
+function startBonusQuestion() {
+  const currentType = state.levels[state.levelIdx].type;
+  const allTypes = ['count', 'add5', 'rozklad', 'compare', 'add10', 'sequence', 'addsub20'];
+  let bonusType = currentType;
+  let baseTier = difficultyTier(currentType);
+  let minTier = baseTier;
+  for (const t of allTypes) {
+    if (t === currentType) continue;
+    const tier = difficultyTier(t);
+    if (tier < minTier) { minTier = tier; bonusType = t; }
+  }
+  const bonusTier = Math.min(2, Math.max(0, minTier + 1));
+  const q = generateOne(bonusType, bonusTier);
+  q.prompt = '🌟 ' + q.prompt;
+  state.currentQuestions.push(q);
+  state.questionIdx = QUESTIONS_PER_LEVEL;
+  state.inBonus = true;
+  renderQuestion();
 }
 
 function finishLevel() {
@@ -1554,18 +1644,17 @@ function finishLevel() {
 }
 
 function showResultScreen(stars) {
+  const lvl = state.levels[state.levelIdx];
   showScreen('result');
   document.getElementById('result-title').textContent =
-    stars === 3 ? 'Perfektné!' : (stars === 2 ? 'Skvelá práca!' : 'Dobre!');
+    lvl.bonus ? '🌟 Fantastické!' : (stars === 3 ? 'Perfektné!' : (stars === 2 ? 'Skvelá práca!' : 'Dobre!'));
   const petName = state.pet.name;
-  document.getElementById('result-speech').textContent = pick([
-    `Si super matematik!`,
-    `${petName} sa teší!`,
-    'Ideme ďalej!',
-    'Skvelý postup!',
-    `${petName} ďakuje!`,
-    'O krok bližšie k hviezdam!',
-  ]);
+  document.getElementById('result-speech').textContent = lvl.bonus
+    ? pick([`${petName} je nadšený!`, 'Bonus zvládnutý!', 'Si hviezdičkový matematik!'])
+    : pick([`Si super matematik!`, `${petName} sa teší!`, 'Ideme ďalej!', 'Skvelý postup!', `${petName} ďakuje!`, 'O krok bližšie k hviezdam!']);
+  const starsDisplay = document.getElementById('stars-display');
+  const existingBonus = starsDisplay.querySelector('.star-bonus');
+  if (existingBonus) existingBonus.remove();
   const starEls = document.querySelectorAll('.star-big');
   starEls.forEach((s, i) => {
     s.classList.remove('show', 'dim');
@@ -1577,6 +1666,15 @@ function showResultScreen(stars) {
       if (i < stars) audio.play('star', i);
     }, 200 + i * 300);
   });
+  if (lvl.bonus) {
+    const bonusStar = document.createElement('div');
+    bonusStar.className = 'star-bonus';
+    starsDisplay.appendChild(bonusStar);
+    setTimeout(() => {
+      bonusStar.classList.add('show');
+      audio.play('star', 3);
+    }, 200 + 3 * 300);
+  }
 }
 
 // ========== CONFETTI ==========
