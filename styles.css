@@ -253,6 +253,14 @@
     border-radius: 4px;
   }
 
+  .welcome-stars {
+    font-family: 'Fredoka', sans-serif;
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--c-accent);
+    letter-spacing: 0.02em;
+  }
+
   /* Big buttons */
   .btn {
     border: none;
@@ -1317,3 +1325,60 @@
   }
   .audio-toggle.muted { background: #eee; border-color: #bbb; color: #999; }
   #vol-slider { width: 120px; accent-color: #ff8c42; cursor: pointer; }
+
+  /* ========== TABLET (≥ 600px wide) ========== */
+  @media (min-width: 600px) {
+    .app { max-width: 620px; }
+
+    /* Welcome */
+    .welcome { gap: 20px; }
+    .fox-stage { width: 200px; height: 200px; }
+    .title-stack h1 { font-size: 52px; }
+    .speech { font-size: 19px; max-width: 420px; }
+    .welcome-stars { font-size: 26px; }
+
+    /* Difficulty */
+    .diff-num { font-size: 72px; }
+    .diff-label { font-size: 20px; }
+    .diff-cards { max-width: 480px; gap: 20px; }
+
+    /* Character */
+    .pet-grid { max-width: 420px; gap: 16px; }
+    .pet-card { font-size: 64px; }
+    .name-input-wrap { max-width: 420px; }
+
+    /* Map */
+    .node { width: 88px; height: 88px; }
+    .node-icon { font-size: 32px; }
+
+    /* Level */
+    .question-prompt { font-size: 22px; }
+    .question-visual { font-size: 44px; min-height: 130px; }
+    .equation { font-size: 60px; }
+    .answer-btn { font-size: 36px; min-height: 88px; }
+    .scale-wrap { max-width: 460px; }
+    .scale-stage { height: 260px; }
+    .bean-wrap { max-width: 460px; }
+    .bean-stage { height: 280px; }
+
+    /* Result / Win */
+    .result-title { font-size: 46px; }
+    .star-big { width: 76px; height: 76px; }
+    .win-trophy { font-size: 120px; }
+    .win-title { font-size: 40px; }
+
+    /* Shared buttons */
+    .btn { font-size: 24px; padding: 20px 44px; }
+    .icon-btn { width: 50px; height: 50px; font-size: 22px; }
+  }
+
+  /* ========== LANDSCAPE WITH SMALL HEIGHT (phones landscape, some tablets) ========== */
+  @media (max-height: 520px) {
+    .welcome { gap: 8px; justify-content: flex-start; padding-top: 6px; overflow-y: auto; }
+    .fox-stage { width: 100px; height: 100px; }
+    .title-stack h1 { font-size: 28px; }
+    .title-stack .super { font-size: 18px; }
+    .title-stack .sub { font-size: 16px; }
+    .speech { font-size: 14px; padding: 8px 14px; }
+    .btn { padding: 12px 28px; font-size: 18px; }
+  }

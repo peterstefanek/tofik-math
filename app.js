@@ -265,6 +265,18 @@ function applyPet() {
   const speech = document.getElementById('welcome-speech');
   if (speech) speech.innerHTML = `Ahoj! Som <b>${state.pet.name}</b>. Snívam o hviezdach. Pomôžeš mi vyjsť na vrchol?`;
   document.title = `${state.pet.name} a cesta ku hviezdam`;
+  updateWelcomeStars();
+}
+
+function updateWelcomeStars() {
+  const el = document.getElementById('welcome-stars');
+  if (!el) return;
+  if (state.totalStars > 0) {
+    el.textContent = `⭐ ${state.totalStars}`;
+    el.style.display = '';
+  } else {
+    el.style.display = 'none';
+  }
 }
 
 // ========== PERSISTENCE ==========
@@ -403,7 +415,7 @@ function confirmPet() {
 }
 
 function startGame() { showScreen('map'); renderMap(); }
-function goWelcome() { showScreen('welcome'); }
+function goWelcome() { showScreen('welcome'); updateWelcomeStars(); }
 function goMap() { stopAllSensors(); showScreen('map'); renderMap(); checkWin(); }
 
 // Jump straight into the next undone level (primary action from the map)
