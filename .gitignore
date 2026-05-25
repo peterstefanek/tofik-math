@@ -1,1 +1,10 @@
+# dependencies from local testing (Playwright etc.)
+node_modules/
+package.json
+package-lock.json
+
+# test screenshots
+*.png
+
+# local work notes
 work/
