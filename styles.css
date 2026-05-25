@@ -417,7 +417,7 @@
   }
 
   /* ========== LEVEL ========== */
-  .level { gap: 16px; }
+  .level { gap: 0; }
   .level-header {
     display: flex;
     align-items: center;
@@ -455,6 +455,11 @@
     padding: 24px 20px;
     box-shadow: 0 6px 0 var(--c-shadow-soft), 0 12px 28px var(--c-shadow);
     text-align: center;
+    flex: 1 1 0;
+    min-height: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    margin-top: 16px;
   }
   .question-prompt {
     font-size: 19px;
@@ -508,10 +513,16 @@
   .equation .blank.filled,
   .seq-cell.blank.filled,
   .rozklad-part.unknown .part-num.filled,
-  .basket-label.hidden-q.filled {
+  .basket-label.hidden-q.filled,
+  .magic-cell.magic-blank.filled {
     animation: answer-stamp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
     color: var(--c-green-dk) !important;
     border-bottom-color: var(--c-green) !important;
+  }
+  .magic-cell.magic-blank.filled {
+    background: rgba(92,168,92,0.22) !important;
+    border-color: var(--c-green) !important;
+    border-style: solid !important;
   }
   .rozklad-part.unknown.filled-host {
     border-color: var(--c-green) !important;
@@ -1193,7 +1204,8 @@
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 12px;
-    margin-top: 20px;
+    margin-top: 12px;
+    flex-shrink: 0;
   }
   .answer-btn {
     background: var(--c-cream);

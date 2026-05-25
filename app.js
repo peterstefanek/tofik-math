@@ -1843,6 +1843,13 @@ function fillAnswerVisual(chosen) {
     hidden.classList.add('filled');
     return;
   }
+  // Magic square: fill the blank cell
+  const magicBlank = visual.querySelector('.magic-blank');
+  if (magicBlank) {
+    magicBlank.textContent = chosen;
+    magicBlank.classList.add('filled');
+    return;
+  }
 }
 
 function handleAnswer(btn, chosen, correct) {
