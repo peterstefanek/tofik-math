@@ -3044,7 +3044,7 @@ const audio = (() => {
     if (membrane) membrane.volume.value = db;
     if (metal)    metal.volume.value    = db;
     if (noise)    noise.volume.value    = db;
-    if (tiltGain) tiltGain.gain.rampTo(v * 0.25, 0.05);
+    // tiltGain is intentionally not touched here — it is controlled only by tiltStart/tiltStop
   }
 
   const _sounds = {
