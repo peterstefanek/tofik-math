@@ -15,6 +15,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Caveat:wght@700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.9.12/Tone.js" crossorigin="anonymous" defer></script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -1263,6 +1264,48 @@
     z-index: 5;
   }
   .parent-gear:active { opacity: 0.8; }
+
+  /* ===== AUDIO UI ===== */
+  .map-mute-btn {
+    font-size: 20px;
+    line-height: 36px;
+    width: 36px;
+    height: 36px;
+    background: rgba(255,255,255,0.5);
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    opacity: 0.5;
+    padding: 0;
+  }
+  .map-mute-btn:active { opacity: 0.8; }
+  .parent-audio {
+    background: #fff8f0;
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 16px;
+    border: 1.5px solid #ffe0b2;
+  }
+  .parent-audio-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 5px 0;
+  }
+  .parent-audio-row label { font-weight: 600; color: #555; font-size: 15px; }
+  .audio-toggle {
+    padding: 5px 14px;
+    border-radius: 20px;
+    border: 2px solid #ff8c42;
+    background: #fff;
+    color: #ff8c42;
+    font-weight: 700;
+    cursor: pointer;
+    font-size: 14px;
+  }
+  .audio-toggle.muted { background: #eee; border-color: #bbb; color: #999; }
+  #vol-slider { width: 120px; accent-color: #ff8c42; cursor: pointer; }
 </style>
 </head>
 <body>
@@ -1324,6 +1367,7 @@
     <div class="map-header">
       <div class="map-title">Cesta ku hviezdam</div>
       <div class="stars-total">⭐ <span id="total-stars">0</span></div>
+      <button class="map-mute-btn" id="map-mute-btn" onclick="toggleMute()" aria-label="Zvuk">🔊</button>
     </div>
     <div class="map-canvas" id="map-canvas">
       <svg class="path-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
@@ -1436,6 +1480,7 @@ const stats = {
   startedAt: Date.now(),
 };
 const STATS_KEY = 'tofik-stats-v1';
+const AUDIO_KEY = 'tofik-audio-v1';
 const STATS_CAP = 200;
 
 const SKILL_INFO = {
@@ -1728,6 +1773,7 @@ function showScreen(name) {
 
 // Called from the Start button — branches based on whether user is new or returning
 function onStartClick() {
+  audio.play('pet-greet');
   if (!state.mode) {
     // First time → choose difficulty
     showScreen('difficulty');
@@ -1827,8 +1873,27 @@ function renderParentStats() {
   const root = document.getElementById('parent-content');
   const total = totalQuestionsAnswered();
 
+  const audioHtml = `
+    <div class="parent-audio">
+      <div class="parent-audio-row">
+        <label>Zvuky</label>
+        <button class="audio-toggle ${audio.isMuted() ? 'muted' : ''}" id="parent-audio-toggle"
+                onclick="audio.setMuted(!audio.isMuted()); this.textContent=audio.isMuted()?'🔇 Vypnuté':'🔊 Zapnuté'; this.classList.toggle('muted',audio.isMuted()); document.getElementById('vol-slider').disabled=audio.isMuted(); const mb=document.getElementById('map-mute-btn'); if(mb) mb.textContent=audio.isMuted()?'🔇':'🔊';">
+          ${audio.isMuted() ? '🔇 Vypnuté' : '🔊 Zapnuté'}
+        </button>
+      </div>
+      <div class="parent-audio-row">
+        <label>Hlasitosť</label>
+        <input type="range" id="vol-slider" min="0" max="100"
+               value="${Math.round(audio.getVolume() * 100)}"
+               ${audio.isMuted() ? 'disabled' : ''}
+               oninput="audio.setVolume(this.value / 100)">
+      </div>
+    </div>
+  `;
+
   if (total === 0) {
-    root.innerHTML = `
+    root.innerHTML = audioHtml + `
       <div class="parent-empty">
         Zatiaľ tu nie sú žiadne údaje.<br>
         Štatistiky sa začnú zbierať, keď dieťa odpovie na prvé otázky.
@@ -1860,7 +1925,7 @@ function renderParentStats() {
     .slice(-10)
     .reverse();
 
-  root.innerHTML = `
+  root.innerHTML = audioHtml + `
     <div class="stat-row">
       <div class="stat-card">
         <div class="stat-num">${total}</div>
@@ -1979,6 +2044,7 @@ function checkWin() {
       document.getElementById('final-stars-max').textContent = maxStars();
       const winSpeech = document.querySelector('#screen-win .speech');
       if (winSpeech) winSpeech.textContent = `Ďakujem ti, kamarát! Zahráme si znova?`;
+      audio.play('game-complete');
       showScreen('win');
     }, 600);
   }
@@ -2519,6 +2585,7 @@ async function renderCompareScale(q, visual) {
 
     if (correctDir) {
       holdMs = Math.min(HOLD_TARGET, holdMs + dt);
+      audio.tiltUpdate(holdMs / HOLD_TARGET);
       instruction.textContent = 'Skvelé, drž to!';
       instruction.classList.add('success');
     } else if (wrongDir) {
@@ -2534,6 +2601,8 @@ async function renderCompareScale(q, visual) {
 
     if (holdMs >= HOLD_TARGET) {
       done = true;
+      audio.play('correct');
+      audio.tiltStop();
       stopTiltListener();
       finalizeAttempt(heavySide === 'L' ? 'vľavo' : 'vpravo');
       instruction.textContent = 'Výborne!';
@@ -2553,14 +2622,14 @@ async function renderCompareScale(q, visual) {
   };
   const btnL = document.getElementById('scale-tilt-left');
   const btnR = document.getElementById('scale-tilt-right');
-  btnL.addEventListener('mousedown',  () => tiltTo(-25));
-  btnL.addEventListener('touchstart', (e) => { e.preventDefault(); tiltTo(-25); }, { passive: false });
-  btnL.addEventListener('mouseup',    () => tiltTo(0));
-  btnL.addEventListener('touchend',   () => tiltTo(0));
-  btnR.addEventListener('mousedown',  () => tiltTo(25));
-  btnR.addEventListener('touchstart', (e) => { e.preventDefault(); tiltTo(25); }, { passive: false });
-  btnR.addEventListener('mouseup',    () => tiltTo(0));
-  btnR.addEventListener('touchend',   () => tiltTo(0));
+  btnL.addEventListener('mousedown',  () => { audio.tiltStart(); tiltTo(-25); });
+  btnL.addEventListener('touchstart', (e) => { e.preventDefault(); audio.tiltStart(); tiltTo(-25); }, { passive: false });
+  btnL.addEventListener('mouseup',    () => { audio.tiltStop(); tiltTo(0); });
+  btnL.addEventListener('touchend',   () => { audio.tiltStop(); tiltTo(0); });
+  btnR.addEventListener('mousedown',  () => { audio.tiltStart(); tiltTo(25); });
+  btnR.addEventListener('touchstart', (e) => { e.preventDefault(); audio.tiltStart(); tiltTo(25); }, { passive: false });
+  btnR.addEventListener('mouseup',    () => { audio.tiltStop(); tiltTo(0); });
+  btnR.addEventListener('touchend',   () => { audio.tiltStop(); tiltTo(0); });
   // Continuous tick while button held
   const fallbackTick = setInterval(() => {
     if (done) { clearInterval(fallbackTick); return; }
@@ -2570,6 +2639,7 @@ async function renderCompareScale(q, visual) {
   // Try sensors in parallel
   const perm = await requestSensorPermission();
   if (perm === 'granted') {
+    audio.tiltStart();
     startTiltListener((gamma) => {
       // Visualize phone tilt directly (gamma negative = left)
       const weightBias = (heavySide === 'L' ? -4 : 4) * 0.3;
@@ -2625,6 +2695,7 @@ async function renderRozkladShake(q, visual) {
     if (scattered) return;
     scattered = true;
     stopShakeListener();
+    audio.play('shake-rattle');
     instr.textContent = 'Padajú...';
     if (navigator.vibrate) navigator.vibrate([40, 60, 40]);
     // Give each bean a random velocity
@@ -2665,6 +2736,7 @@ async function renderRozkladShake(q, visual) {
           if (Math.abs(b.vy) < 1 && Math.abs(b.vx) < 0.5) {
             b.settled = true;
             b.vx = 0; b.vy = 0;
+            audio.play('bean-drop');
             // Nudge into nearest basket horizontally
             const dest = b.x < MIDLINE ? 'L' : 'R';
             b.basket = dest;
@@ -2770,6 +2842,7 @@ function makeGroupedDots(n, emoji) {
 }
 
 function fillAnswerVisual(chosen) {
+  audio.play('pop');
   const visual = document.getElementById('q-visual');
   if (!visual) return;
   // Equation-based (add5, add10, addsub20): fill the slot-blank
@@ -2809,6 +2882,7 @@ function fillAnswerVisual(chosen) {
 function handleAnswer(btn, chosen, correct) {
   if (btn.disabled) return;
   if (chosen === correct) {
+    audio.play('correct');
     finalizeAttempt(chosen);
     btn.classList.add('correct');
     document.querySelectorAll('.answer-btn').forEach(b => b.disabled = true);
@@ -2816,6 +2890,7 @@ function handleAnswer(btn, chosen, correct) {
     showFeedback(pick(['Super!', 'Skvelé!', 'Výborne!', 'Wow!', 'Bravo!']));
     setTimeout(advance, 1200);
   } else {
+    audio.play('wrong');
     recordWrongInAttempt(chosen);
     btn.classList.add('wrong');
     state.mistakesInLevel++;
@@ -2829,12 +2904,14 @@ function handleAnswer(btn, chosen, correct) {
 function handleCompare(group, side, correct) {
   if (group.classList.contains('correct') || group.classList.contains('wrong')) return;
   if (side === correct) {
+    audio.play('correct');
     finalizeAttempt(side === 'L' ? 'vľavo' : 'vpravo');
     group.classList.add('correct');
     document.querySelectorAll('.compare-group').forEach(g => g.style.pointerEvents = 'none');
     showFeedback(pick(['Super!', 'Skvelé!', 'Výborne!']));
     setTimeout(advance, 1000);
   } else {
+    audio.play('wrong');
     recordWrongInAttempt(side === 'L' ? 'vľavo' : 'vpravo');
     group.classList.add('wrong');
     state.mistakesInLevel++;
@@ -2889,6 +2966,7 @@ function finishLevel() {
   launchConfetti();
 
   setTimeout(() => {
+    audio.play('level-complete');
     showResultScreen(lvl.stars);
   }, 700);
 }
@@ -2912,7 +2990,10 @@ function showResultScreen(stars) {
     if (i >= stars) s.classList.add('dim');
   });
   starEls.forEach((s, i) => {
-    setTimeout(() => s.classList.add('show'), 200 + i * 300);
+    setTimeout(() => {
+      s.classList.add('show');
+      if (i < stars) audio.play('star', i);
+    }, 200 + i * 300);
   });
 }
 
@@ -2939,8 +3020,110 @@ function confirmRestart() {
   }
 }
 
+// ========== AUDIO ==========
+const audio = (() => {
+  let _initialized = false;
+  let _muted = false;
+  let _volume = 0.6;
+  let poly, membrane, metal, noise;
+  let tiltOsc, tiltGain;
+
+  function _load() {
+    try {
+      const d = JSON.parse(localStorage.getItem(AUDIO_KEY) || '{}');
+      if (typeof d.muted  === 'boolean') _muted  = d.muted;
+      if (typeof d.volume === 'number')  _volume = d.volume;
+    } catch(e) {}
+  }
+  function _save() {
+    try { localStorage.setItem(AUDIO_KEY, JSON.stringify({ muted: _muted, volume: _volume })); } catch(e) {}
+  }
+  function _applyVolume(v) {
+    const db = 20 * Math.log10(Math.max(v, 0.0001));
+    if (poly)     poly.volume.value     = db;
+    if (membrane) membrane.volume.value = db;
+    if (metal)    metal.volume.value    = db;
+    if (noise)    noise.volume.value    = db;
+    if (tiltGain) tiltGain.gain.rampTo(v * 0.25, 0.05);
+  }
+
+  const _sounds = {
+    tap()           { poly.triggerAttackRelease('C5', '64n'); },
+    pop()           { const t = Tone.now(); poly.triggerAttackRelease('E5', '32n', t); poly.triggerAttackRelease('A5', '32n', t + 0.04); },
+    correct()       { const t = Tone.now(); poly.triggerAttackRelease('C5','8n',t); poly.triggerAttackRelease('E5','8n',t+0.1); poly.triggerAttackRelease('G5','8n',t+0.2); },
+    wrong()         { const t = Tone.now(); poly.triggerAttackRelease('G4','8n',t); poly.triggerAttackRelease('E4','8n',t+0.15); },
+    star(idx)       { const freqs=[400,500,630]; metal.triggerAttackRelease(freqs[idx??0]??400,'16n'); },
+    'level-complete'() { const t=Tone.now(); ['C5','E5','G5','C6'].forEach((n,i)=>poly.triggerAttackRelease(n,'8n',t+i*0.15)); },
+    'game-complete'()  {
+      const t=Tone.now();
+      ['C5','E5','G5','C6','E6','G6'].forEach((n,i)=>poly.triggerAttackRelease(n,'8n',t+i*0.12));
+      ['C7','E7','G7','C8'].forEach((n,i)=>poly.triggerAttackRelease(n,'32n',t+0.8+i*0.06));
+    },
+    'pet-greet'()   { const t=Tone.now(); poly.triggerAttackRelease('D4','8n',t); poly.triggerAttackRelease('F4','8n',t+0.15); },
+    'shake-rattle'(){ noise.triggerAttackRelease('16n'); },
+    'bean-drop'()   { membrane.triggerAttackRelease('C2','16n'); },
+  };
+
+  return {
+    init() { _load(); },
+
+    unlock() {
+      if (_initialized) return;
+      if (typeof Tone === 'undefined') return;
+      Tone.start().then(() => {
+        poly = new Tone.PolySynth(Tone.Synth, {
+          oscillator: { type: 'triangle' },
+          envelope: { attack: 0.01, decay: 0.1, sustain: 0.2, release: 0.3 },
+        }).toDestination();
+        membrane = new Tone.MembraneSynth({
+          pitchDecay: 0.05, octaves: 4,
+          envelope: { attack: 0.001, decay: 0.2, sustain: 0, release: 0.1 },
+        }).toDestination();
+        metal = new Tone.MetalSynth({
+          frequency: 400,
+          envelope: { attack: 0.001, decay: 0.15, release: 0.1 },
+          harmonicity: 5.1, modulationIndex: 32, resonance: 4000, octaves: 1.5,
+        }).toDestination();
+        noise = new Tone.NoiseSynth({
+          noise: { type: 'white' },
+          envelope: { attack: 0.005, decay: 0.15, sustain: 0, release: 0.05 },
+        }).toDestination();
+        tiltOsc  = new Tone.Oscillator({ type: 'sine', frequency: 220 });
+        tiltGain = new Tone.Gain(0).toDestination();
+        tiltOsc.connect(tiltGain);
+        tiltOsc.start();
+        _applyVolume(_volume);
+        _initialized = true;
+      }).catch(() => {});
+    },
+
+    play(name, param) {
+      if (_muted || !_initialized || _volume === 0) return;
+      const fn = _sounds[name];
+      if (fn) { try { fn(param); } catch(e) {} }
+    },
+
+    tiltStart()          { if (!tiltGain || _muted) return; tiltGain.gain.rampTo(_volume * 0.25, 0.1); },
+    tiltUpdate(progress) { if (!tiltOsc  || _muted) return; tiltOsc.frequency.rampTo(220 + progress * 220, 0.05); },
+    tiltStop()           { if (!tiltGain) return; tiltGain.gain.rampTo(0, 0.1); },
+
+    isMuted:   () => _muted,
+    getVolume: () => _volume,
+    setMuted(b)  { _muted = b; _save(); },
+    setVolume(v) { _volume = v; _applyVolume(v); _save(); },
+  };
+})();
+
+function toggleMute() {
+  audio.setMuted(!audio.isMuted());
+  const icon = audio.isMuted() ? '🔇' : '🔊';
+  const muteBtn = document.getElementById('map-mute-btn');
+  if (muteBtn) muteBtn.textContent = icon;
+}
+
 // ========== INITIALIZATION ==========
 function init() {
+  audio.init();
   loadState();
   loadStats();
   applyPet();
@@ -3003,6 +3186,28 @@ if ('serviceWorker' in navigator) {
     });
   });
 }
+
+// Unlock AudioContext pri prvom user gesture
+document.addEventListener('click', function _unlock() {
+  audio.unlock();
+  document.removeEventListener('click', _unlock, true);
+}, { capture: true, once: true });
+
+// Globálny tap zvuk
+document.addEventListener('click', (e) => {
+  if (e.target.closest('.btn, .answer-btn, .node, .pet-card, .diff-card, .icon-btn, .map-mute-btn, .shake-prompt, .audio-toggle')) {
+    audio.play('tap');
+  }
+}, { capture: true });
+
+// Pauza zvuku keď je tab skrytý
+document.addEventListener('visibilitychange', () => {
+  if (typeof Tone === 'undefined') return;
+  try {
+    const ctx = Tone.getContext().rawContext;
+    document.hidden ? ctx.suspend() : ctx.resume();
+  } catch(e) {}
+});
 
 // Boot
 init();
