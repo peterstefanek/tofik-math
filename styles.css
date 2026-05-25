@@ -795,9 +795,9 @@
 
   /* magic square */
   .magic-sparkles {
-    font-size: 22px;
+    font-size: 18px;
     text-align: center;
-    letter-spacing: 8px;
+    letter-spacing: 6px;
     animation: magic-glow 2s ease-in-out infinite alternate;
   }
   @keyframes magic-glow {
@@ -837,28 +837,29 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 10px;
-    margin-top: 6px;
+    gap: 8px;
+    margin-top: 4px;
   }
   .magic-help-btn {
     font-size: 15px !important;
     padding: 10px 18px !important;
   }
   .magic-help-panel {
-    background: rgba(255,255,255,0.85);
+    background: rgba(255,255,255,0.92);
     border: 2px solid var(--c-yellow);
     border-radius: 16px;
-    padding: 14px 16px;
+    padding: 10px 14px;
     max-width: 300px;
     text-align: center;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
   }
-  .magic-help-icon { font-size: 32px; }
-  .magic-help-text { font-size: 15px; line-height: 1.5; color: var(--c-ink); }
-  .magic-help-sum  { font-size: 20px; color: var(--c-accent); }
+  .magic-help-panel[hidden] { display: none; }
+  .magic-help-icon { font-size: 24px; }
+  .magic-help-text { font-size: 13px; line-height: 1.4; color: var(--c-ink); }
+  .magic-help-sum  { font-size: 17px; color: var(--c-accent); }
 
   /* compare big numbers (pokrocile, values > 10) */
   .compare-big-num {
