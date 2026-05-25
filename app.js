@@ -757,6 +757,7 @@ function stopShakeListener() {
 function stopAllSensors() {
   stopTiltListener();
   stopShakeListener();
+  audio.tiltStop();
 }
 
 function generateQuestions(type) {
