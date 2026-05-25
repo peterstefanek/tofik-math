@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**Tofík a cesta ku hviezdam** is a single-file Progressive Web App (PWA) — an educational math game for Slovak first-graders. All application code lives in one file: `tofik-matematika.html`.
+**Tofík a cesta ku hviezdam** is a single-file Progressive Web App (PWA) — an educational math game for Slovak first-graders. All application code lives in one file: `index.html`.
 
 ## Running Locally
 
@@ -16,7 +16,7 @@ python -m http.server 8000
 npx http-server
 ```
 
-Then open `http://localhost:8000/tofik-matematika.html`.
+Then open `http://localhost:8000/index.html`.
 
 **HTTPS note:** Service Worker registration requires HTTPS on iOS. For local testing on a phone, use a tool like `ngrok` or deploy to a host with HTTPS.
 
@@ -24,7 +24,7 @@ Then open `http://localhost:8000/tofik-matematika.html`.
 
 | File | Purpose |
 |------|---------|
-| `tofik-matematika.html` | Entire application (HTML + CSS + JS, ~3,000 lines) |
+| `index.html` | Entire application (HTML + CSS + JS, ~3,000 lines) |
 | `manifest.json` | PWA manifest (name, icons, display mode, orientation) |
 | `service-worker.js` | Cache-first offline strategy, cache key `tofik-v1` |
 | `icon.svg` | App icon (fox face, maskable, 512×512) |

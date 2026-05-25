@@ -2,7 +2,7 @@
   "name": "Tofík a cesta ku hviezdam",
   "short_name": "Tofík",
   "description": "Náučná hra na matematiku pre prvákov.",
-  "start_url": "./tofik-matematika.html",
+  "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",

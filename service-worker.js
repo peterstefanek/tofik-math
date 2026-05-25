@@ -4,7 +4,7 @@
 const CACHE_NAME = 'tofik-v1';
 const APP_SHELL = [
   './',
-  './tofik-matematika.html',
+  './index.html',
   './manifest.json',
   './icon.svg',
   'https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Caveat:wght@700&display=swap',
