@@ -703,7 +703,7 @@
   }
   .piggy-stage {
     position: relative;
-    height: 230px;
+    height: 210px;
     background: linear-gradient(to bottom, rgba(255,255,255,0.3), rgba(212,232,184,0.2));
     border-radius: 18px;
     overflow: hidden;
@@ -753,35 +753,35 @@
   }
   /* 1 € — smaller gold coin */
   .coin-fly.coin-val-1 {
-    width: 36px; height: 36px;
+    width: 40px; height: 40px;
     border-radius: 50%;
-    font-size: 11px;
+    font-size: 15px;
     background: radial-gradient(circle at 35% 30%, #ffe066 0%, #c89000 100%);
     border: 2px solid #a87000;
   }
   /* 2 € — larger coin, gold centre + silver rim */
   .coin-fly.coin-val-2 {
-    width: 50px; height: 50px;
+    width: 54px; height: 54px;
     border-radius: 50%;
-    font-size: 13px;
+    font-size: 17px;
     background: radial-gradient(circle at 35% 30%, #ffe899 0%, #d4a000 70%, #888 100%);
     border: 3px solid #aaa;
     box-shadow: 0 0 0 2px #d4a000, 0 4px 8px rgba(0,0,0,0.25);
   }
   /* 5 € — green banknote */
   .note-fly.note-val-5 {
-    width: 72px; height: 38px;
+    width: 76px; height: 42px;
     border-radius: 6px;
-    font-size: 13px;
+    font-size: 16px;
     background: linear-gradient(135deg, #81c784 0%, #388e3c 100%);
     border: 2px solid #2e7d32;
     color: #fff;
   }
   /* 10 € — blue banknote, slightly bigger */
   .note-fly.note-val-10 {
-    width: 88px; height: 46px;
+    width: 92px; height: 50px;
     border-radius: 6px;
-    font-size: 13px;
+    font-size: 16px;
     background: linear-gradient(135deg, #64b5f6 0%, #1565c0 100%);
     border: 2px solid #0d47a1;
     color: #fff;

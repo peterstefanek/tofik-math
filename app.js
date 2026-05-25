@@ -1722,78 +1722,68 @@ function renderPeniazeScatter(q, visual) {
   });
 
   function scatterCoins() {
-    const stageW = () => stage.clientWidth;
-    const stageH = () => stage.clientHeight;
-    const cx = stageW() / 2;
-    const cy = stageH() / 2;
-    const items = [];
+    const W = stage.clientWidth  || 300;
+    const H = stage.clientHeight || 210;
+    const cx = W / 2, cy = H / 2;
 
-    // Half-sizes for collision (centered positioning via translate(-50%,-50%))
-    const HW = { coin1: 18, coin2: 25, note5: 36, note10: 44 };
-    const HH = { coin1: 18, coin2: 25, note5: 19, note10: 23 };
+    // Half-dimensions (width/2, height/2) matching CSS sizes
+    const HDIMS = {
+      coin1:  { hw: 20, hh: 20 },
+      coin2:  { hw: 27, hh: 27 },
+      note5:  { hw: 38, hh: 21 },
+      note10: { hw: 46, hh: 25 },
+    };
+    const GAP = 10; // minimum gap between edges of any two items
+    const PAD = 10; // distance from stage border
+    const placed = [];
+
+    function overlaps(x, y, hw, hh) {
+      return placed.some(p =>
+        Math.abs(x - p.x) < hw + p.hw + GAP &&
+        Math.abs(y - p.y) < hh + p.hh + GAP
+      );
+    }
+
+    function findPos(hw, hh) {
+      const minX = hw + PAD, maxX = W - hw - PAD;
+      const minY = hh + PAD, maxY = H - hh - PAD;
+      for (let i = 0; i < 120; i++) {
+        const x = minX + Math.random() * (maxX - minX);
+        const y = minY + Math.random() * (maxY - minY);
+        if (!overlaps(x, y, hw, hh)) return { x, y };
+      }
+      return { x: minX + Math.random() * (maxX - minX), y: minY + Math.random() * (maxY - minY) };
+    }
+
+    let buttonsShown = false;
+    const showButtons = () => { if (!buttonsShown) { buttonsShown = true; renderAnswerButtons(q.options, q.answer); } };
+    const fallback = setTimeout(showButtons, 3000);
 
     q.items.forEach((item, idx) => {
       const key = item.isNote ? `note${item.val}` : `coin${item.val}`;
+      const { hw, hh } = HDIMS[key] ?? { hw: 25, hh: 25 };
+      const pos = findPos(hw, hh);
+      placed.push({ x: pos.x, y: pos.y, hw, hh });
+
       const el = document.createElement('div');
       el.className = `peniaze-fly ${item.isNote ? `note-fly note-val-${item.val}` : `coin-fly coin-val-${item.val}`}`;
       el.textContent = item.val + '€';
       el.style.left = cx + 'px';
-      el.style.top = (cy - 10) + 'px';
+      el.style.top  = cy + 'px';
       stage.appendChild(el);
 
-      const angle = (idx / q.items.length) * Math.PI * 2 + (Math.random() - 0.5) * 1.4;
-      const speed = 5 + Math.random() * 7;
-      items.push({
-        el, x: cx, y: cy - 10,
-        vx: Math.cos(angle) * speed,
-        vy: Math.sin(angle) * speed - 5,
-        hw: HW[key] ?? 25,
-        hh: HH[key] ?? 25,
-        settled: false,
-      });
+      // Fly to final position with springy ease, staggered per item
+      const delay = 40 + idx * 80;
+      setTimeout(() => {
+        el.style.transition = `left 0.45s cubic-bezier(0.22,1.3,0.36,1) ${idx * 0.04}s, top 0.45s cubic-bezier(0.22,1.3,0.36,1) ${idx * 0.04}s`;
+        el.style.left = pos.x + 'px';
+        el.style.top  = pos.y + 'px';
+        audio.play('bean-drop');
+      }, delay);
     });
 
-    const GRAVITY = 0.45;
-    const FRICTION = 0.84;
-    const RESTITUTION = 0.32;
-    let buttonsShown = false;
-    const showButtons = () => { if (!buttonsShown) { buttonsShown = true; renderAnswerButtons(q.options, q.answer); } };
-    // Safety: force-show buttons after 3 s even if physics hasn't settled
-    const fallback = setTimeout(showButtons, 3000);
-
-    function step() {
-      let active = 0;
-      const W = stageW();
-      const H = stageH();
-      items.forEach(b => {
-        if (b.settled) return;
-        b.vy += GRAVITY;
-        b.x  += b.vx;
-        b.y  += b.vy;
-        const FLOOR = H - b.hh;
-        if (b.x < b.hw)     { b.x = b.hw;     b.vx = -b.vx * RESTITUTION; }
-        if (b.x > W - b.hw) { b.x = W - b.hw; b.vx = -b.vx * RESTITUTION; }
-        if (b.y >= FLOOR) {
-          b.y  = FLOOR;
-          b.vy = -b.vy * RESTITUTION;
-          b.vx *= FRICTION;
-          if (Math.abs(b.vy) < 1 && Math.abs(b.vx) < 0.5) {
-            b.settled = true;
-            audio.play('bean-drop');
-          }
-        }
-        b.el.style.left = b.x + 'px';
-        b.el.style.top  = b.y + 'px';
-        if (!b.settled) active++;
-      });
-      if (active > 0) {
-        requestAnimationFrame(step);
-      } else {
-        clearTimeout(fallback);
-        setTimeout(showButtons, 450);
-      }
-    }
-    requestAnimationFrame(step);
+    const totalMs = 40 + q.items.length * 80 + 500;
+    setTimeout(() => { clearTimeout(fallback); showButtons(); }, totalMs);
   }
 }
 
