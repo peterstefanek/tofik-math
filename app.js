@@ -6,6 +6,7 @@ const state = {
   levelIdx: 0,
   questionIdx: 0,
   mistakesInLevel: 0,
+  wrongOnQuestion: 0,
   totalStars: 0,
   inBonus: false,
   bonusTimerInterval: null,
@@ -1132,6 +1133,12 @@ function startLevel(idx) {
   renderQuestion();
 }
 
+function maybeRevealHelp() {
+  if (state.wrongOnQuestion >= 3) {
+    document.getElementById('help-btn')?.removeAttribute('hidden');
+  }
+}
+
 function renderQuestion() {
   const q = state.currentQuestions[state.questionIdx];
   const prompt = document.getElementById('q-prompt');
@@ -1139,6 +1146,7 @@ function renderQuestion() {
   const grid = document.getElementById('answer-grid');
   const progress = document.getElementById('progress-fill');
 
+  state.wrongOnQuestion = 0;
   prompt.textContent = q.prompt;
   visual.innerHTML = '';
   grid.innerHTML = '';
@@ -1325,8 +1333,10 @@ function renderQuestion() {
       const wpHelpWrap = document.createElement('div');
       wpHelpWrap.className = 'wp-help-wrap';
       const wpHelpBtn = document.createElement('button');
+      wpHelpBtn.id = 'help-btn';
       wpHelpBtn.className = 'btn secondary wp-help-btn';
       wpHelpBtn.textContent = S.help.show;
+      wpHelpBtn.hidden = true;
       const wpHelpPanel = document.createElement('div');
       wpHelpPanel.className = 'wp-help-panel';
       wpHelpPanel.hidden = true;
@@ -1363,8 +1373,10 @@ function renderQuestion() {
       const helpWrap = document.createElement('div');
       helpWrap.className = 'magic-help-wrap';
       const helpBtn = document.createElement('button');
+      helpBtn.id = 'help-btn';
       helpBtn.className = 'btn secondary magic-help-btn';
       helpBtn.textContent = S.help.needHelp;
+      helpBtn.hidden = true;
       const helpPanel = document.createElement('div');
       helpPanel.className = 'magic-help-panel';
       helpPanel.hidden = true;
@@ -1935,6 +1947,8 @@ function handleAnswer(btn, chosen, correct) {
       showFeedback(S.feedback.bonusTimeout, true);
     } else {
       state.mistakesInLevel++;
+      state.wrongOnQuestion++;
+      maybeRevealHelp();
       setTimeout(() => { btn.classList.remove('wrong'); btn.disabled = false; }, 600);
       showFeedback(S.feedback.wrong, true);
       highlightHint();
@@ -1964,6 +1978,8 @@ function handleCompare(group, side, correct) {
       showFeedback(S.feedback.bonusTimeout, true);
     } else {
       state.mistakesInLevel++;
+      state.wrongOnQuestion++;
+      maybeRevealHelp();
       setTimeout(() => group.classList.remove('wrong'), 600);
       showFeedback(S.feedback.wrong, true);
     }
