@@ -2322,6 +2322,9 @@ if ('serviceWorker' in navigator) {
       // New SW waiting right after registration (page refreshed while update pending)
       if (reg.waiting) onWaiting();
 
+      // Periodic update check every 60 min — catches updates while app stays open
+      setInterval(() => reg.update(), 60 * 60 * 1000);
+
       // New SW found during this session
       reg.addEventListener('updatefound', () => {
         reg.installing.addEventListener('statechange', function () {
