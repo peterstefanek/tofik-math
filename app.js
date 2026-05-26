@@ -2242,7 +2242,7 @@ function init() {
     startBtn.textContent = 'Pokračovať →';
     const speech = document.getElementById('welcome-speech');
     if (speech) {
-      speech.innerHTML = `<b>${state.pet.name}</b> ťa znova víta! Pokračujeme k hviezdam.`;
+      speech.innerHTML = `Pokračujme na ceste ku hviezdam!`;
     }
   }
 }
