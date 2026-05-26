@@ -109,10 +109,13 @@ export function makeOptions(correct, min, max) {
     if (candidate !== correct) set.add(candidate);
     attempts++;
   }
-  // Fallback if we somehow couldn't fill (very narrow ranges)
+  // Fallback: extend range if needed to reach 4 distinct values
+  let ext = 1;
   while (set.size < 4) {
-    const c = min + rand(range + 1);
-    set.add(c);
+    for (let v = min - ext; v <= max + ext; v++) {
+      if (!set.has(v)) { set.add(v); if (set.size === 4) break; }
+    }
+    ext++;
   }
   return shuffle([...set]);
 }
