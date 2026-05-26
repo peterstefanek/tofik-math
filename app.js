@@ -994,15 +994,17 @@ function generateOne(type, tier = null) {
       const slot = rand(20) < 13 ? 'result' : (rand(2) === 0 ? 'a' : 'b');
       let a, b, sum;
       if (isAdd) {
-        const minA = tier <= -1 ? 5 : tier === 0 ? 5 : tier === 1 ? 8 : 10;
-        const maxA = tier <= -1 ? 12 : tier === 0 ? 15 : tier === 1 ? 16 : 17;
+        // All tiers ≥ 0: sum must cross 10 (that's the whole point of do20)
+        const minA = tier <= -1 ? 5 : 8;
+        const maxA = tier <= -1 ? 12 : tier === 0 ? 12 : tier === 1 ? 14 : 17;
         a = minA + rand(maxA - minA + 1);
+        const minB = tier <= -1 ? 2 : Math.max(3, 11 - a); // ensures sum > 10
         const maxB = Math.min(9, 20 - a);
-        b = maxB >= 2 ? 2 + rand(maxB - 1) : 1;
+        b = minB + rand(Math.max(1, maxB - minB + 1));
         sum = a + b;
       } else {
-        a = 11 + rand(10);
-        b = 2 + rand(8);
+        a = 12 + rand(9);                          // a ∈ [12..20]
+        b = 3 + rand(Math.min(a - 4, 7));          // b ∈ [3..min(a-2, 9)]
         sum = a - b;
       }
       const answer = slot === 'result' ? sum : (slot === 'a' ? a : b);
@@ -1263,7 +1265,6 @@ function renderQuestion() {
         const tree = document.createElement('div');
         tree.className = 'rozklad-tree';
         const dotCountLeft = Math.min(10, q.part);
-        const dotCountRight = Math.min(10, q.total - q.part);
         tree.innerHTML = `
           <div class="rozklad-top">${q.total}</div>
           <svg class="rozklad-lines" viewBox="0 0 200 30" preserveAspectRatio="none" aria-hidden="true">
@@ -1277,7 +1278,6 @@ function renderQuestion() {
             </div>
             <div class="rozklad-part unknown">
               <div class="part-num">?</div>
-              <div class="part-dots">${'❓'.repeat(dotCountRight)}</div>
             </div>
           </div>
         `;
