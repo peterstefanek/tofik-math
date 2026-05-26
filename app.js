@@ -528,6 +528,7 @@ function renderParentStats() {
       <div class="parent-empty">${S.parent.noStats}</div>
       <div class="parent-actions">
         <button class="btn-danger" onclick="confirmRestart()">${S.parent.restartBtn}</button>
+        <button class="btn-secondary" id="check-update-btn" onclick="checkForUpdate()">${S.parent.updateCheck}</button>
       </div>
     `;
     return;
@@ -594,6 +595,7 @@ function renderParentStats() {
     <div class="parent-actions">
       <button class="btn-danger" onclick="confirmRestart()">${S.parent.restartBtn}</button>
       <button class="btn-danger" onclick="confirmResetStats()">${S.parent.resetStatsBtn}</button>
+      <button class="btn-secondary" id="check-update-btn" onclick="checkForUpdate()">${S.parent.updateCheck}</button>
     </div>
 
     <div style="text-align:center; font-size:11px; color:var(--c-ink-soft); margin-top:14px; padding:0 12px;">
@@ -2317,6 +2319,7 @@ function setupLongPress(el, callback, ms = 1000) {
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('service-worker.js').then((reg) => {
+      window._swReg = reg;
       const onWaiting = () => showUpdateBanner(reg);
 
       // New SW waiting right after registration (page refreshed while update pending)
@@ -2362,6 +2365,27 @@ function applyUpdate() {
   }
 }
 
+async function checkForUpdate() {
+  const btn = document.getElementById('check-update-btn');
+  const reg = window._swReg;
+  if (!reg || !btn) return;
+  btn.disabled = true;
+  btn.textContent = S.parent.updateChecking;
+  try {
+    await reg.update();
+    // Give the updatefound event 3 s to fire and show the banner
+    setTimeout(() => {
+      if (!document.getElementById('update-banner')) {
+        btn.textContent = S.parent.updateCurrent;
+        btn.disabled = false;
+      }
+    }, 3000);
+  } catch {
+    btn.textContent = S.parent.updateCheck;
+    btn.disabled = false;
+  }
+}
+
 // Unlock AudioContext pri prvom user gesture
 document.addEventListener('click', function _unlock() {
   audio.unlock();
@@ -2397,6 +2421,6 @@ Object.assign(window, {
   startBonusQuestion, finishLevel,
   confirmRestart, confirmResetStats, confirmChangeDifficulty,
   requestPersistentStorage, renderParentStats,
-  applyUpdate,
+  applyUpdate, checkForUpdate,
   audio,
 });

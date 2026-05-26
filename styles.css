@@ -1581,6 +1581,11 @@
     color: var(--c-accent-2);
   }
   .btn-danger:active { background: rgba(242,92,84,0.25); }
+  .btn-secondary {
+    background: rgba(95,183,212,0.15);
+    color: var(--c-blue);
+  }
+  .btn-secondary:active { background: rgba(95,183,212,0.25); }
 
   /* Tiny parent gear icon on welcome screen */
   .parent-gear {

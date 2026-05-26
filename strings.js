@@ -168,6 +168,9 @@ export const S = {
     skillMeta:          (count, avg, mistakes) => `${count} otázok · ⌀ ${avg} s · ${mistakes} chýb`,
     restartBtn:         '↺ Začať hru odznova',
     resetStatsBtn:      'Vymazať štatistiky',
+    updateCheck:        '🔄 Skontrolovať aktualizáciu',
+    updateChecking:     'Kontrolujem…',
+    updateCurrent:      '✓ Aplikácia je aktuálna',
     privacy:            'Štatistiky sa ukladajú len v tomto zariadení. Nikam sa neodosielajú.',
   },
 
