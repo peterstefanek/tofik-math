@@ -1,3 +1,5 @@
+import { S } from './strings.js';
+
 // ========== GAME STATE ==========
 const state = {
   current: 'welcome',
@@ -11,13 +13,13 @@ const state = {
   pet: { species: 'fox', name: 'Tofík' },
   mode: null, // 'do10' | 'do20' — null until chosen
   levels: [
-    { id: 0, name: 'Lúka',     icon: '🌼', x: 20, y: 92, type: 'count',    done: false, stars: 0, bonus: false },
-    { id: 1, name: 'Sad',      icon: '🍎', x: 72, y: 80, type: 'add5',     done: false, stars: 0, bonus: false },
-    { id: 2, name: 'Vodopád',  icon: '💧', x: 24, y: 67, type: 'rozklad',  done: false, stars: 0, bonus: false },
-    { id: 3, name: 'Jazierko', icon: '🐟', x: 72, y: 54, type: 'compare',  done: false, stars: 0, bonus: false },
-    { id: 4, name: 'Jaskyňa',  icon: '🐻', x: 24, y: 41, type: 'add10',    done: false, stars: 0, bonus: false },
-    { id: 5, name: 'Vrchol',   icon: '⛰️', x: 72, y: 28, type: 'sequence', done: false, stars: 0, bonus: false },
-    { id: 6, name: 'Hviezdy',  icon: '🌟', x: 32, y: 12, type: 'addsub20', done: false, stars: 0, bonus: false },
+    { id: 0, name: S.levelNames[0], icon: '🌼', x: 20, y: 92, type: 'count',    done: false, stars: 0, bonus: false },
+    { id: 1, name: S.levelNames[1], icon: '🍎', x: 72, y: 80, type: 'add5',     done: false, stars: 0, bonus: false },
+    { id: 2, name: S.levelNames[2], icon: '💧', x: 24, y: 67, type: 'rozklad',  done: false, stars: 0, bonus: false },
+    { id: 3, name: S.levelNames[3], icon: '🐟', x: 72, y: 54, type: 'compare',  done: false, stars: 0, bonus: false },
+    { id: 4, name: S.levelNames[4], icon: '🐻', x: 24, y: 41, type: 'add10',    done: false, stars: 0, bonus: false },
+    { id: 5, name: S.levelNames[5], icon: '⛰️', x: 72, y: 28, type: 'sequence', done: false, stars: 0, bonus: false },
+    { id: 6, name: S.levelNames[6], icon: '🌟', x: 32, y: 12, type: 'addsub20', done: false, stars: 0, bonus: false },
   ],
   currentQuestions: [],
 };
@@ -36,12 +38,12 @@ const QUESTIONS_PER_LEVEL = 4;
 
 // ========== PETS ==========
 const PETS = [
-  { id: 'fox',      emoji: '🦊', defaultName: 'Tofík',  useSvg: true  },
-  { id: 'bear',     emoji: '🐻', defaultName: 'Maco',   useSvg: false },
-  { id: 'rabbit',   emoji: '🐰', defaultName: 'Hopko',  useSvg: false },
-  { id: 'owl',      emoji: '🦉', defaultName: 'Sovka',  useSvg: false },
-  { id: 'hedgehog', emoji: '🦔', defaultName: 'Ferko',  useSvg: false },
-  { id: 'cat',      emoji: '🐱', defaultName: 'Mica',   useSvg: false },
+  { id: 'fox',      emoji: '🦊', defaultName: S.petNames.fox,      useSvg: true  },
+  { id: 'bear',     emoji: '🐻', defaultName: S.petNames.bear,     useSvg: false },
+  { id: 'rabbit',   emoji: '🐰', defaultName: S.petNames.rabbit,   useSvg: false },
+  { id: 'owl',      emoji: '🦉', defaultName: S.petNames.owl,      useSvg: false },
+  { id: 'hedgehog', emoji: '🦔', defaultName: S.petNames.hedgehog, useSvg: false },
+  { id: 'cat',      emoji: '🐱', defaultName: S.petNames.cat,      useSvg: false },
 ];
 
 function getPet(id) { return PETS.find(p => p.id === id) || PETS[0]; }
@@ -58,18 +60,18 @@ const AUDIO_KEY = 'tofik-audio-v1';
 const STATS_CAP = 200;
 
 const SKILL_INFO = {
-  count:      { icon: '🌼', name: 'Počítanie' },
-  add5:       { icon: '🍎', name: 'Sčítanie do 5' },
-  rozklad:    { icon: '💧', name: 'Rozklad čísel' },
-  compare:    { icon: '🐟', name: 'Porovnávanie' },
-  add10:      { icon: '🐻', name: 'Sčítanie do 10' },
-  sequence:   { icon: '⛰️', name: 'Postupnosti' },
-  addsub20:   { icon: '🌟', name: '+ a − do 20' },
-  rozklad20:  { icon: '💧', name: 'Rozklad do 20' },
-  seqstep:    { icon: '🔢', name: 'Postupnosti s krokom' },
-  peniaze:    { icon: '🪙', name: 'Počítanie peňazí' },
-  wordproblem:{ icon: '📖', name: 'Slovné úlohy' },
-  magic:      { icon: '✨', name: 'Magický štvorec' },
+  count:      { icon: '🌼', name: S.skillNames.count },
+  add5:       { icon: '🍎', name: S.skillNames.add5 },
+  rozklad:    { icon: '💧', name: S.skillNames.rozklad },
+  compare:    { icon: '🐟', name: S.skillNames.compare },
+  add10:      { icon: '🐻', name: S.skillNames.add10 },
+  sequence:   { icon: '⛰️', name: S.skillNames.sequence },
+  addsub20:   { icon: '🌟', name: S.skillNames.addsub20 },
+  rozklad20:  { icon: '💧', name: S.skillNames.rozklad20 },
+  seqstep:    { icon: '🔢', name: S.skillNames.seqstep },
+  peniaze:    { icon: '🪙', name: S.skillNames.peniaze },
+  wordproblem:{ icon: '📖', name: S.skillNames.wordproblem },
+  magic:      { icon: '✨', name: S.skillNames.magic },
 };
 
 // Live tracking of current question
@@ -82,7 +84,7 @@ function todayKey() {
 
 function questionLabel(q) {
   switch (q.type) {
-    case 'count':    return `Spočítaj ${q.answer}`;
+    case 'count':    return `${S.prompts.countLabel} ${q.answer}`;
     case 'add5':
     case 'add10': {
       const slot = q.slot || 'result';
@@ -228,22 +230,22 @@ function streakDays() {
 
 function formatDuration(ms) {
   const s = Math.round(ms / 1000);
-  if (s < 60) return s + ' s';
+  if (s < 60) return S.time.seconds(s);
   const m = Math.floor(s / 60);
   const rs = s % 60;
-  if (m < 60) return rs ? `${m} m ${rs} s` : `${m} min`;
+  if (m < 60) return rs ? S.time.minSec(m, rs) : S.time.minOnly(m);
   const h = Math.floor(m / 60);
-  return `${h} h ${m % 60} min`;
+  return S.time.hourMin(h, m % 60);
 }
 
 function formatRelative(ts) {
   const diff = Date.now() - ts;
-  if (diff < 60000) return 'pred chvíľou';
-  if (diff < 3600000) return Math.floor(diff/60000) + ' min';
-  if (diff < 86400000) return Math.floor(diff/3600000) + ' h';
+  if (diff < 60000) return S.time.justNow;
+  if (diff < 3600000) return S.time.minutes(Math.floor(diff/60000));
+  if (diff < 86400000) return S.time.hours(Math.floor(diff/3600000));
   const d = Math.floor(diff / 86400000);
-  if (d === 1) return 'včera';
-  return d + ' dní';
+  if (d === 1) return S.time.yesterday;
+  return S.time.days(d);
 }
 
 // Returns the fox SVG markup
@@ -284,10 +286,10 @@ function applyPet() {
   if (r) r.innerHTML = petMarkup(state.pet.species);
   // Title and speech use pet name (gender-neutral phrasing to work for all pets)
   const title = document.getElementById('welcome-title');
-  if (title) title.innerHTML = `${state.pet.name} a<br>cesta ku hviezdam`;
+  if (title) title.innerHTML = S.welcome.title(state.pet.name);
   const speech = document.getElementById('welcome-speech');
-  if (speech) speech.innerHTML = `Ahoj, som ${state.pet.name}. Poď so mnou na cestu ku hviezdam!`;
-  document.title = `${state.pet.name} a cesta ku hviezdam`;
+  if (speech) speech.innerHTML = S.welcome.speech(state.pet.name);
+  document.title = S.welcome.docTitle(state.pet.name);
   updateWelcomeStars();
 }
 
@@ -487,14 +489,14 @@ function renderParentStats() {
   const audioHtml = `
     <div class="parent-audio">
       <div class="parent-audio-row">
-        <label>Zvuky</label>
+        <label>${S.parent.audio}</label>
         <button class="audio-toggle ${audio.isMuted() ? 'muted' : ''}" id="parent-audio-toggle"
-                onclick="audio.setMuted(!audio.isMuted()); this.textContent=audio.isMuted()?'🔇 Vypnuté':'🔊 Zapnuté'; this.classList.toggle('muted',audio.isMuted()); document.getElementById('vol-slider').disabled=audio.isMuted(); const mb=document.getElementById('map-mute-btn'); if(mb) mb.textContent=audio.isMuted()?'🔇':'🔊';">
-          ${audio.isMuted() ? '🔇 Vypnuté' : '🔊 Zapnuté'}
+                onclick="audio.setMuted(!audio.isMuted()); this.textContent=audio.isMuted()?'${S.parent.audioOff}':'${S.parent.audioOn}'; this.classList.toggle('muted',audio.isMuted()); document.getElementById('vol-slider').disabled=audio.isMuted(); const mb=document.getElementById('map-mute-btn'); if(mb) mb.textContent=audio.isMuted()?'🔇':'🔊';">
+          ${audio.isMuted() ? S.parent.audioOff : S.parent.audioOn}
         </button>
       </div>
       <div class="parent-audio-row">
-        <label>Hlasitosť</label>
+        <label>${S.parent.volume}</label>
         <input type="range" id="vol-slider" min="0" max="100"
                value="${Math.round(audio.getVolume() * 100)}"
                ${audio.isMuted() ? 'disabled' : ''}
@@ -503,7 +505,7 @@ function renderParentStats() {
     </div>
     <div class="storage-status-wrap" id="storage-status">
       <span class="storage-status-icon">⏳</span>
-      <span class="storage-status-text">Kontrolujem ochranu dát…</span>
+      <span class="storage-status-text">${S.parent.storageChecking}</span>
     </div>
   `;
   // Async: fill in real storage persistence status after render
@@ -511,24 +513,21 @@ function renderParentStats() {
     const el = document.getElementById('storage-status');
     if (!el) return;
     if (persisted === null) {
-      el.innerHTML = '<span class="storage-status-icon">ℹ️</span><span class="storage-status-text">Ochrana úložiska nie je dostupná v tomto prehliadači.</span>';
+      el.innerHTML = `<span class="storage-status-icon">ℹ️</span><span class="storage-status-text">${S.parent.storageUnavailable}</span>`;
     } else if (persisted) {
-      el.innerHTML = '<span class="storage-status-icon">🔒</span><span class="storage-status-text">Dáta sú chránené — prehliadač ich nevymaže bez tvojho súhlasu.</span>';
+      el.innerHTML = `<span class="storage-status-icon">🔒</span><span class="storage-status-text">${S.parent.storageProtected}</span>`;
       el.classList.add('storage-ok');
     } else {
-      el.innerHTML = '<span class="storage-status-icon">⚠️</span><span class="storage-status-text">Dáta nie sú chránené. Prehliadač ich môže vymazať pri plnom úložisku.</span><button class="storage-persist-btn" onclick="requestPersistentStorage().then(()=>renderParentStats())">Chrániť dáta</button>';
+      el.innerHTML = `<span class="storage-status-icon">⚠️</span><span class="storage-status-text">${S.parent.storageUnprotected}</span><button class="storage-persist-btn" onclick="requestPersistentStorage().then(()=>renderParentStats())">${S.parent.storageBtn}</button>`;
       el.classList.add('storage-warn');
     }
   });
 
   if (total === 0) {
     root.innerHTML = audioHtml + `
-      <div class="parent-empty">
-        Zatiaľ tu nie sú žiadne údaje.<br>
-        Štatistiky sa začnú zbierať, keď dieťa odpovie na prvé otázky.
-      </div>
+      <div class="parent-empty">${S.parent.noStats}</div>
       <div class="parent-actions">
-        <button class="btn-danger" onclick="confirmRestart()">↺ Začať hru odznova</button>
+        <button class="btn-danger" onclick="confirmRestart()">${S.parent.restartBtn}</button>
       </div>
     `;
     return;
@@ -558,53 +557,53 @@ function renderParentStats() {
     <div class="stat-row">
       <div class="stat-card">
         <div class="stat-num">${total}</div>
-        <div class="stat-label">otázok celkovo</div>
+        <div class="stat-label">${S.parent.statTotal}</div>
       </div>
       <div class="stat-card">
         <div class="stat-num ${acc >= 0.85 ? 'green' : (acc >= 0.65 ? 'orange' : '')}">${Math.round(acc * 100)}%</div>
-        <div class="stat-label">úspešnosť na prvý pokus</div>
+        <div class="stat-label">${S.parent.statAccuracy}</div>
       </div>
     </div>
     <div class="stat-row">
       <div class="stat-card">
         <div class="stat-num">${formatDuration(time)}</div>
-        <div class="stat-label">celkový čas hrania</div>
+        <div class="stat-label">${S.parent.statTime}</div>
       </div>
       <div class="stat-card">
         <div class="stat-num">${(avgTime/1000).toFixed(1)} s</div>
-        <div class="stat-label">priemerne na otázku</div>
+        <div class="stat-label">${S.parent.statAvgTime}</div>
       </div>
     </div>
     <div class="stat-row">
       <div class="stat-card">
         <div class="stat-num orange">🔥 ${streak}</div>
-        <div class="stat-label">dní v rade</div>
+        <div class="stat-label">${S.parent.statStreak}</div>
       </div>
       <div class="stat-card">
         <div class="stat-num">${mistakes}</div>
-        <div class="stat-label">chýb spolu</div>
+        <div class="stat-label">${S.parent.statMistakes}</div>
       </div>
     </div>
 
-    <div class="parent-h3">Podľa zručnosti</div>
+    <div class="parent-h3">${S.parent.bySkill}</div>
     ${renderSkillRows(skills)}
 
-    <div class="parent-h3">Posledné chyby</div>
+    <div class="parent-h3">${S.parent.recentMistakes}</div>
     ${renderRecentMistakes(wrongAttempts)}
 
     <div class="parent-actions">
-      <button class="btn-danger" onclick="confirmRestart()">↺ Začať hru odznova</button>
-      <button class="btn-danger" onclick="confirmResetStats()">Vymazať štatistiky</button>
+      <button class="btn-danger" onclick="confirmRestart()">${S.parent.restartBtn}</button>
+      <button class="btn-danger" onclick="confirmResetStats()">${S.parent.resetStatsBtn}</button>
     </div>
 
     <div style="text-align:center; font-size:11px; color:var(--c-ink-soft); margin-top:14px; padding:0 12px;">
-      Štatistiky sa ukladajú len v tomto zariadení. Nikam sa neodosielajú.
+      ${S.parent.privacy}
     </div>
   `;
 }
 
 function renderSkillRows(skills) {
-  if (!skills.length) return '<div class="parent-empty">Nič tu zatiaľ nie je.</div>';
+  if (!skills.length) return `<div class="parent-empty">${S.parent.noSkillData}</div>`;
   return skills.map(s => {
     const info = SKILL_INFO[s.type] || { icon: '•', name: s.type };
     const pct = Math.round(s.accuracy * 100);
@@ -615,7 +614,7 @@ function renderSkillRows(skills) {
         <div class="skill-icon">${info.icon}</div>
         <div class="skill-info">
           <div class="skill-name">${info.name}</div>
-          <div class="skill-meta">${s.count} otázok · ⌀ ${(s.avgMs/1000).toFixed(1)} s · ${s.mistakes} chýb</div>
+          <div class="skill-meta">${S.parent.skillMeta(s.count, (s.avgMs/1000).toFixed(1), s.mistakes)}</div>
           <div class="skill-bar"><div class="skill-bar-fill" style="width:${pct}%; background:${color};"></div></div>
         </div>
         <div class="skill-acc ${cls}">${pct}%</div>
@@ -625,7 +624,7 @@ function renderSkillRows(skills) {
 }
 
 function renderRecentMistakes(wrongs) {
-  if (!wrongs.length) return '<div class="parent-empty">Žiadne chyby — paráda! 🎉</div>';
+  if (!wrongs.length) return `<div class="parent-empty">${S.parent.noMistakes}</div>`;
   return wrongs.map(a => {
     const wrongAnswers = a.given.slice(0, a.given.length - 1); // last is correct
     const given = wrongAnswers.slice(0, 2).join(', '); // show up to 2 wrong attempts
@@ -643,7 +642,7 @@ function renderRecentMistakes(wrongs) {
 }
 
 function confirmResetStats() {
-  if (confirm('Naozaj vymazať všetky štatistiky? Pokrok v hre ostane zachovaný.')) {
+  if (confirm(S.confirm.resetStats)) {
     clearStats();
     renderParentStats();
   }
@@ -674,7 +673,7 @@ function checkWin() {
       document.getElementById('final-stars').textContent = state.totalStars;
       document.getElementById('final-stars-max').textContent = maxStars();
       const winSpeech = document.querySelector('#screen-win .speech');
-      if (winSpeech) winSpeech.textContent = `Ďakujem ti, kamarát! Zahráme si znova?`;
+      if (winSpeech) winSpeech.textContent = S.win.speech;
       audio.play('game-complete');
       showScreen('win');
     }, 600);
@@ -847,16 +846,18 @@ function difficultyTier(type) {
 }
 
 // ========== WORD PROBLEMS BANK ==========
-const WORD_PROBLEMS = [
-  { emoji:'🍪', text:(a,b,e)=>`Tomáš má ${a} ${e} keksíkov. Dostal ešte ${b} ${e}. Koľko má spolu?`,           a:()=>5+rand(7),  b:()=>2+rand(6),  op:'+' },
-  { emoji:'✏️', text:(a,b,e)=>`Jana má ${a} ${e} ceruziek. Dala ${b} ${e} kamarátke. Koľko jej ostalo?`,        a:()=>8+rand(8),  b:()=>2+rand(6),  op:'-' },
-  { emoji:'🍏', text:(a,b,e)=>`V košíku je ${a} ${e} jabĺk. Pribudlo ${b} ${e}. Koľko ich je spolu?`,          a:()=>5+rand(7),  b:()=>3+rand(7),  op:'+' },
-  { emoji:'🐦', text:(a,b,e)=>`Na strome sedelo ${a} ${e} vtákov. Odletelo ${b} ${e}. Koľko zostalo?`,         a:()=>10+rand(8), b:()=>3+rand(7),  op:'-' },
-  { emoji:'🧁', text:(a,b,e)=>`Mama upiekla ${a} ${e} buchiet. Ocko zjedol ${b} ${e}. Koľko buchiet ostalo?`,   a:()=>10+rand(7), b:()=>2+rand(6),  op:'-' },
-  { emoji:'🔴', text:(a,b,e)=>`Vo fľaši bolo ${a} ${e} guličiek. Pridal som ${b} ${e}. Koľko ich je?`,          a:()=>6+rand(9),  b:()=>2+rand(6),  op:'+' },
-  { emoji:'🏷️', text:(a,b,e)=>`Peter má ${a} ${e} nálepiek. Zdenko má o ${b} ${e} menej. Koľko má Zdenko?`,     a:()=>10+rand(8), b:()=>2+rand(7),  op:'-' },
-  { emoji:'🌰', text:(a,b,e)=>`Anička nazbierala ${a} ${e} gaštanov. Nazbierala ešte ${b} ${e}. Koľko ich má?`, a:()=>5+rand(9),  b:()=>2+rand(7),  op:'+' },
+// text/emoji/op from strings.js; number generators here
+const WORD_PROBLEM_GENERATORS = [
+  { a: () => 5+rand(7),  b: () => 2+rand(6) },
+  { a: () => 8+rand(8),  b: () => 2+rand(6) },
+  { a: () => 5+rand(7),  b: () => 3+rand(7) },
+  { a: () => 10+rand(8), b: () => 3+rand(7) },
+  { a: () => 10+rand(7), b: () => 2+rand(6) },
+  { a: () => 6+rand(9),  b: () => 2+rand(6) },
+  { a: () => 10+rand(8), b: () => 2+rand(7) },
+  { a: () => 5+rand(9),  b: () => 2+rand(7) },
 ];
+const WORD_PROBLEMS = S.wordProblems.map((wp, i) => ({ ...wp, ...WORD_PROBLEM_GENERATORS[i] }));
 
 // ========== MAGIC SQUARES BANK (row-major, all rows+cols sum to `sum`) ==========
 const MAGIC_SQUARES = [
@@ -899,7 +900,7 @@ function generateOne(type, tier = null) {
       const n = lo + rand(hi - lo + 1);
       return {
         type, answer: n, emoji,
-        prompt: `Koľko ${pluralize(emoji)} vidíš?`,
+        prompt: S.prompts.countQ(pluralize(emoji)),
         visual: emoji.repeat(n),
         options: makeOptions(n, 1, Math.max(14, n + 2)),
       };
@@ -913,7 +914,7 @@ function generateOne(type, tier = null) {
       const answer = slot === 'result' ? sum : (slot === 'a' ? a : b);
       return {
         type, slot, answer, emoji,
-        prompt: slot === 'result' ? 'Koľko spolu?' : 'Doplň chýbajúce číslo:',
+        prompt: slot === 'result' ? S.prompts.addResult : S.prompts.addMissing,
         a, b, sum, op: '+',
         options: makeOptions(answer, 0, 10),
       };
@@ -923,7 +924,7 @@ function generateOne(type, tier = null) {
       const isPokrocile = state.mode === 'pokrocile';
       if (tier <= -1 && !isPokrocile) {
         do { a = 1 + rand(6); b = 1 + rand(6); } while (a === b || Math.abs(a - b) < 3);
-        return { type, variant: 'tap', answer: a > b ? 'L' : 'R', emoji, prompt: 'Kde je viac?', a, b };
+        return { type, variant: 'tap', answer: a > b ? 'L' : 'R', emoji, prompt: S.prompts.compareTap, a, b };
       }
       const maxN = isPokrocile ? 18 : (tier === 0 ? 8 : tier === 1 ? 9 : 10);
       do { a = 1 + rand(maxN); b = 1 + rand(maxN); } while (a === b);
@@ -932,7 +933,7 @@ function generateOne(type, tier = null) {
       const variant = rand(10) < tapChance ? 'tap' : 'scale';
       return {
         type, variant, answer: a > b ? 'L' : 'R', emoji,
-        prompt: variant === 'scale' ? 'Nakloň telefón k ťažšej strane!' : 'Kde je viac?',
+        prompt: variant === 'scale' ? S.prompts.compareScale : S.prompts.compareTap,
         a, b,
       };
     }
@@ -946,7 +947,7 @@ function generateOne(type, tier = null) {
       const answer = slot === 'result' ? sum : (slot === 'a' ? a : b);
       return {
         type, slot, answer, emoji,
-        prompt: slot === 'result' ? 'Spočítaj:' : 'Doplň chýbajúce číslo:',
+        prompt: slot === 'result' ? S.prompts.add10Result : S.prompts.addMissing,
         a, b, sum, op: '+',
         options: makeOptions(answer, 0, 14),
       };
@@ -960,7 +961,7 @@ function generateOne(type, tier = null) {
       const answer = seq[pos];
       return {
         type, answer,
-        prompt: 'Aké číslo chýba?',
+        prompt: S.prompts.missingNum,
         seq, pos,
         options: makeOptions(answer, 1, Math.max(20, seq[4] + step)),
       };
@@ -975,8 +976,8 @@ function generateOne(type, tier = null) {
       return {
         type, variant, answer, emoji,
         prompt: variant === 'shake'
-          ? `Zatras telefónom a rozhoď ${total} fazuľ!`
-          : `Koľko chýba do ${total}?`,
+          ? S.prompts.rozkladShake(total)
+          : S.prompts.rozkladTree(total),
         total, part,
         options: makeOptions(answer, 0, total),
       };
@@ -999,10 +1000,10 @@ function generateOne(type, tier = null) {
         sum = a - b;
       }
       const answer = slot === 'result' ? sum : (slot === 'a' ? a : b);
-      const promptStandard = isAdd ? 'Spočítaj:' : 'Odpočítaj:';
+      const promptStandard = isAdd ? S.prompts.add10Result : S.prompts.subResult;
       return {
         type, slot, answer, isAdd,
-        prompt: slot === 'result' ? promptStandard : 'Doplň chýbajúce číslo:',
+        prompt: slot === 'result' ? promptStandard : S.prompts.addMissing,
         a, b, sum, op: isAdd ? '+' : '−', emoji,
         options: makeOptions(answer, 0, 20),
       };
@@ -1016,7 +1017,7 @@ function generateOne(type, tier = null) {
       const answer = seq[pos];
       return {
         type, answer,
-        prompt: 'Aké číslo chýba?',
+        prompt: S.prompts.missingNum,
         seq, pos, step,
         options: makeOptions(answer, 1, 20),
       };
@@ -1029,7 +1030,7 @@ function generateOne(type, tier = null) {
       const part = total - answer;
       return {
         type, variant: 'tree', answer, emoji,
-        prompt: `Koľko chýba do ${total}?`,
+        prompt: S.prompts.rozkladTree(total),
         total, part,
         options: makeOptions(answer, 0, 10),
       };
@@ -1051,7 +1052,7 @@ function generateOne(type, tier = null) {
       if (items.length < 2) { items = [{ val:2, isNote:false }, { val:5, isNote:true }]; total = 7; }
       return {
         type, answer: total,
-        prompt: 'Koľko eur máš v prasiatku?',
+        prompt: S.prompts.peniaze,
         items, total,
         options: makeOptions(total, 1, 20),
       };
@@ -1079,7 +1080,7 @@ function generateOne(type, tier = null) {
       const answer = ms.grid[blankPos];
       return {
         type, answer,
-        prompt: 'Aké číslo chýba v magickom štvorci?',
+        prompt: S.prompts.magicPrompt,
         grid: ms.grid, blankPos, sum: ms.sum,
         options: makeOptions(answer, 0, 14),
       };
@@ -1088,13 +1089,7 @@ function generateOne(type, tier = null) {
 }
 
 function pluralize(emoji) {
-  // friendly Slovak descriptors per emoji
-  const map = {
-    '🍎':'jabĺčok', '🌻':'kvietkov', '🐝':'včielok', '🍓':'jahôd',
-    '⭐':'hviezdičiek', '🦋':'motýľov', '🍄':'hríbov', '🌸':'kvietkov',
-    '💧':'kvapiek', '🌟':'hviezdičiek', '💎':'klenotov', '🍒':'čerešní', '🍬':'cukríkov',
-  };
-  return map[emoji] || 'vecí';
+  return S.emojiNames[emoji] || S.emojiNameDefault;
 }
 
 function makeOptions(correct, min, max) {
@@ -1323,14 +1318,14 @@ function renderQuestion() {
       wpHelpWrap.className = 'wp-help-wrap';
       const wpHelpBtn = document.createElement('button');
       wpHelpBtn.className = 'btn secondary wp-help-btn';
-      wpHelpBtn.textContent = '💡 Zobraziť nápovedu';
+      wpHelpBtn.textContent = S.help.show;
       const wpHelpPanel = document.createElement('div');
       wpHelpPanel.className = 'wp-help-panel';
       wpHelpPanel.hidden = true;
       buildWpHint(wpHelpPanel, q);
       wpHelpBtn.addEventListener('click', () => {
         wpHelpPanel.hidden = !wpHelpPanel.hidden;
-        wpHelpBtn.textContent = wpHelpPanel.hidden ? '💡 Zobraziť nápovedu' : '💡 Skryť nápovedu';
+        wpHelpBtn.textContent = wpHelpPanel.hidden ? S.help.show : S.help.hide;
         audio.play('tap');
       });
       wpHelpWrap.appendChild(wpHelpBtn);
@@ -1361,20 +1356,20 @@ function renderQuestion() {
       helpWrap.className = 'magic-help-wrap';
       const helpBtn = document.createElement('button');
       helpBtn.className = 'btn secondary magic-help-btn';
-      helpBtn.textContent = '💡 Potrebujem pomoc';
+      helpBtn.textContent = S.help.needHelp;
       const helpPanel = document.createElement('div');
       helpPanel.className = 'magic-help-panel';
       helpPanel.hidden = true;
       helpPanel.innerHTML = `
         <div class="magic-help-icon">🔮</div>
         <div class="magic-help-text">
-          V magickom štvorci platí: súčet čísel v každom <b>riadku</b> aj každom <b>stĺpci</b> je vždy rovnaký.
+          ${S.help.magicRule}
         </div>
-        <div class="magic-help-sum">Súčet = <b>${q.sum}</b></div>
+        <div class="magic-help-sum">${S.help.magicSum(q.sum)}</div>
       `;
       helpBtn.addEventListener('click', () => {
         helpPanel.hidden = !helpPanel.hidden;
-        helpBtn.textContent = helpPanel.hidden ? '💡 Potrebujem pomoc' : '💡 Skryť nápovedu';
+        helpBtn.textContent = helpPanel.hidden ? S.help.needHelp : S.help.hide;
         audio.play('tap');
       });
       helpWrap.appendChild(helpBtn);
@@ -1500,15 +1495,15 @@ async function renderCompareScale(q, visual) {
     if (correctDir) {
       holdMs = Math.min(HOLD_TARGET, holdMs + dt);
       audio.tiltUpdate(holdMs / HOLD_TARGET);
-      instruction.textContent = 'Skvelé, drž to!';
+      instruction.textContent = S.feedback.scaleGood;
       instruction.classList.add('success');
     } else if (wrongDir) {
       holdMs = Math.max(0, holdMs - dt * 0.5);
-      instruction.textContent = 'Opačná strana!';
+      instruction.textContent = S.feedback.scaleWrong;
       instruction.classList.remove('success');
     } else {
       holdMs = Math.max(0, holdMs - dt * 0.3);
-      instruction.textContent = 'Nakloň telefón k ťažšej strane!';
+      instruction.textContent = S.prompts.compareScale;
       instruction.classList.remove('success');
     }
     progressFill.style.width = (holdMs / HOLD_TARGET * 100) + '%';
@@ -1519,10 +1514,10 @@ async function renderCompareScale(q, visual) {
       audio.tiltStop();
       stopTiltListener();
       finalizeAttempt(heavySide === 'L' ? 'vľavo' : 'vpravo');
-      instruction.textContent = 'Výborne!';
+      instruction.textContent = S.feedback.scaleSuccess;
       instruction.classList.add('success');
       if (navigator.vibrate) navigator.vibrate(60);
-      showFeedback(pick(['Super!', 'Skvelé!', 'Výborne!', 'Bravo!']));
+      showFeedback(pick(S.feedback.correctShort));
       setTimeout(advance, 900);
     }
   }
@@ -1570,13 +1565,13 @@ async function renderRozkladShake(q, visual) {
   wrap.className = 'bean-wrap';
   wrap.innerHTML = `
     <div class="bean-count-badge">${q.total}</div>
-    <div class="bean-instruction" id="bean-instruction">Zatras a rozhoď fazule do košíkov!</div>
+    <div class="bean-instruction" id="bean-instruction">${S.beans.shake}</div>
     <div class="bean-stage" id="bean-stage">
       <div class="basket left"><div class="basket-floor"></div><div class="basket-label" id="basket-label-l">?</div></div>
       <div class="basket right"><div class="basket-floor"></div><div class="basket-label" id="basket-label-r">?</div></div>
     </div>
     <div class="bean-shake-btn">
-      <button class="shake-prompt" id="manual-shake"><span class="shake-icon">📱</span> Alebo kliknite tu</button>
+      <button class="shake-prompt" id="manual-shake">${S.beans.manualBtn}</button>
     </div>
   `;
   visual.appendChild(wrap);
@@ -1612,7 +1607,7 @@ async function renderRozkladShake(q, visual) {
     scattered = true;
     stopShakeListener();
     audio.play('shake-rattle');
-    instr.textContent = 'Padajú...';
+    instr.textContent = S.beans.falling;
     if (navigator.vibrate) navigator.vibrate([40, 60, 40]);
     // Give each bean a random velocity
     beans.forEach(b => {
@@ -1716,7 +1711,7 @@ async function renderRozkladShake(q, visual) {
       lblR.textContent = showLeft ? '?'    : countR;
       if (!showLeft) lblL.classList.add('hidden-q'); else lblR.classList.add('hidden-q');
 
-      instr.innerHTML = `V <b>${showLeft ? 'ľavom' : 'pravom'}</b> košíku je <b>${knownCount}</b>. Koľko je v druhom?`;
+      instr.innerHTML = S.beans.question(showLeft ? S.beans.sideLeft : S.beans.sideRight, knownCount);
 
       // Re-start attempt with the actual problem (post-scatter); the question
       // really begins now, not when the scatter animation started.
@@ -1762,7 +1757,7 @@ function renderPeniazeScatter(q, visual) {
     <div class="piggy-stage" id="piggy-stage">
       <div class="piggy-bank" id="piggy-bank">🐷</div>
     </div>
-    <div class="piggy-instruction" id="piggy-instruction">Klikni na prasiatko! 👆</div>
+    <div class="piggy-instruction" id="piggy-instruction">${S.peniaze.click}</div>
   `;
   visual.appendChild(wrap);
 
@@ -1780,7 +1775,7 @@ function renderPeniazeScatter(q, visual) {
     setTimeout(() => {
       piggyEl.textContent = '💥';
       piggyEl.classList.remove('piggy-breaking');
-      instrEl.textContent = 'Spočítaj všetky peniaze!';
+      instrEl.textContent = S.peniaze.count;
       setTimeout(() => {
         piggyEl.style.display = 'none';
         scatterCoins();
@@ -1917,7 +1912,7 @@ function handleAnswer(btn, chosen, correct) {
     btn.classList.add('correct');
     document.querySelectorAll('.answer-btn').forEach(b => b.disabled = true);
     fillAnswerVisual(chosen);
-    showFeedback(pick(['Super!', 'Skvelé!', 'Výborne!', 'Wow!', 'Bravo!']));
+    showFeedback(pick(S.feedback.correct));
     setTimeout(advance, 1200);
   } else {
     audio.play('wrong');
@@ -1929,11 +1924,11 @@ function handleAnswer(btn, chosen, correct) {
         state.inBonus = false;
         finishLevel();
       }, 700);
-      showFeedback('Nevadí, skúsiš to neskôr!', true);
+      showFeedback(S.feedback.bonusTimeout, true);
     } else {
       state.mistakesInLevel++;
       setTimeout(() => { btn.classList.remove('wrong'); btn.disabled = false; }, 600);
-      showFeedback('Skús ešte raz!', true);
+      showFeedback(S.feedback.wrong, true);
       highlightHint();
     }
   }
@@ -1946,7 +1941,7 @@ function handleCompare(group, side, correct) {
     finalizeAttempt(side === 'L' ? 'vľavo' : 'vpravo');
     group.classList.add('correct');
     document.querySelectorAll('.compare-group').forEach(g => g.style.pointerEvents = 'none');
-    showFeedback(pick(['Super!', 'Skvelé!', 'Výborne!']));
+    showFeedback(pick(S.feedback.correctShort));
     setTimeout(advance, 1000);
   } else {
     audio.play('wrong');
@@ -1958,11 +1953,11 @@ function handleCompare(group, side, correct) {
         state.inBonus = false;
         finishLevel();
       }, 700);
-      showFeedback('Nevadí, skúsiš to neskôr!', true);
+      showFeedback(S.feedback.bonusTimeout, true);
     } else {
       state.mistakesInLevel++;
       setTimeout(() => group.classList.remove('wrong'), 600);
-      showFeedback('Skús ešte raz!', true);
+      showFeedback(S.feedback.wrong, true);
     }
   }
 }
@@ -2008,16 +2003,16 @@ function advance() {
 
 function showBonusPrompt() {
   document.getElementById('progress-fill').style.width = '100%';
-  document.getElementById('q-prompt').textContent = '🌟 Bonus!';
+  document.getElementById('q-prompt').textContent = S.bonus.label;
   document.getElementById('q-visual').innerHTML = '';
   const grid = document.getElementById('answer-grid');
   grid.innerHTML = '';
   const wrap = document.createElement('div');
   wrap.className = 'bonus-prompt';
   wrap.innerHTML = `
-    <div class="bonus-text">Zvládneš ťažšiu otázku?</div>
-    <button class="btn green" onclick="startBonusQuestion()">Áno, skúsim! 💪</button>
-    <button class="btn secondary" style="font-size:16px;padding:12px 22px;" onclick="finishLevel()">Preskočiť</button>
+    <div class="bonus-text">${S.bonus.question}</div>
+    <button class="btn green" onclick="startBonusQuestion()">${S.bonus.accept}</button>
+    <button class="btn secondary" style="font-size:16px;padding:12px 22px;" onclick="finishLevel()">${S.bonus.skip}</button>
   `;
   grid.appendChild(wrap);
   audio.play('pop');
@@ -2061,7 +2056,7 @@ function startBonusTimer() {
     if (state.bonusTimeLeft <= 0) {
       stopBonusTimer();
       state.inBonus = false;
-      showFeedback('⏰ Čas vypršal!', true);
+      showFeedback(S.bonus.timeout, true);
       setTimeout(() => finishLevel(), 1400);
     }
   }, 1000);
@@ -2101,11 +2096,11 @@ function showResultScreen(stars) {
   const lvl = state.levels[state.levelIdx];
   showScreen('result');
   document.getElementById('result-title').textContent =
-    lvl.bonus ? '🌟 Fantastické!' : (stars === 3 ? 'Perfektné!' : (stars === 2 ? 'Skvelá práca!' : 'Dobre!'));
+    lvl.bonus ? S.result.bonusTitle : (stars === 3 ? S.result.stars3 : (stars === 2 ? S.result.stars2 : S.result.stars1));
   const petName = state.pet.name;
   document.getElementById('result-speech').textContent = lvl.bonus
-    ? pick([`${petName} je nadšený!`, 'Bonus zvládnutý!', 'Si hviezdičkový matematik!'])
-    : pick([`Si super matematik!`, `${petName} sa teší!`, 'Ideme ďalej!', 'Skvelý postup!', `${petName} ďakuje!`, 'O krok bližšie k hviezdam!']);
+    ? pick(S.result.bonusSpeeches(petName))
+    : pick(S.result.normalSpeeches(petName));
   const starsDisplay = document.getElementById('stars-display');
   const existingBonus = starsDisplay.querySelector('.star-bonus');
   if (existingBonus) existingBonus.remove();
@@ -2150,7 +2145,7 @@ function launchConfetti() {
 
 // ========== RESTART CONFIRMATION ==========
 function confirmRestart() {
-  if (confirm('Naozaj začať odznova? Stratíš všetok pokrok.')) {
+  if (confirm(S.confirm.restart)) {
     restartGame();
   }
 }
@@ -2274,11 +2269,9 @@ function init() {
   const hasProgress = state.mode && (state.totalStars > 0 || state.levels.some(l => l.done));
   const startBtn = document.getElementById('start-btn');
   if (hasProgress && startBtn) {
-    startBtn.textContent = 'Pokračovať →';
+    startBtn.textContent = S.welcome.continueBtn;
     const speech = document.getElementById('welcome-speech');
-    if (speech) {
-      speech.innerHTML = `Pokračujme na ceste ku hviezdam!`;
-    }
+    if (speech) speech.innerHTML = S.welcome.speechReturn;
   }
 }
 
@@ -2344,8 +2337,8 @@ function showUpdateBanner(reg) {
   banner.id = 'update-banner';
   banner.className = 'update-banner';
   banner.innerHTML = `
-    <span>Nová verzia je k dispozícii 🎉</span>
-    <button class="btn" onclick="applyUpdate()">Obnoviť</button>
+    <span>${S.update.available}</span>
+    <button class="btn" onclick="applyUpdate()">${S.update.btn}</button>
   `;
   document.querySelector('.app').appendChild(banner);
   window._swReg = reg;
@@ -2384,3 +2377,17 @@ document.addEventListener('visibilitychange', () => {
 
 // Boot
 init();
+
+// Expose functions to global scope for HTML inline event handlers
+// (required when app.js is loaded as an ES module)
+Object.assign(window, {
+  onStartClick, selectMode, showScreen, confirmPet,
+  goWelcome, goMap, continueToCurrentLevel,
+  openParent, closeParent,
+  toggleMute, restartGame,
+  startBonusQuestion, finishLevel,
+  confirmRestart, confirmResetStats,
+  requestPersistentStorage, renderParentStats,
+  applyUpdate,
+  audio,
+});
