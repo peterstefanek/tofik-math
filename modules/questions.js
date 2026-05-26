@@ -129,14 +129,16 @@ export function generateOne(type, tier = null) {
   const emoji = pick(EMOJI_BY_LEVEL[type] || ['⭐']);
   switch (type) {
     case 'count': {
+      const isDo10 = _state.mode === 'do10' || !_state.mode;
       const lo = tier <= -1 ? 2 : tier === 0 ? 2 : tier === 1 ? 3 : 5;
-      const hi = tier <= -1 ? 5 : tier === 0 ? 8 : tier === 1 ? 10 : 12;
+      const hi = isDo10 ? (tier <= -1 ? 5 : tier === 0 ? 8 : 10)
+                        : (tier <= -1 ? 5 : tier === 0 ? 8 : tier === 1 ? 10 : 12);
       const n = lo + rand(hi - lo + 1);
       return {
         type, answer: n, emoji,
         prompt: S.prompts.countQ(pluralize(emoji)),
         visual: emoji.repeat(n),
-        options: makeOptions(n, 1, Math.max(14, n + 2)),
+        options: makeOptions(n, 1, hi + 2),
       };
     }
     case 'add5': {
@@ -205,8 +207,9 @@ export function generateOne(type, tier = null) {
       };
     }
     case 'rozklad': {
+      const isDo10 = _state.mode === 'do10' || !_state.mode;
       const minT = tier <= -1 ? 4 : tier === 0 ? 5 : tier === 1 ? 7 : 10;
-      const maxT = tier <= -1 ? 6 : tier === 0 ? 10 : tier === 1 ? 12 : 15;
+      const maxT = isDo10 ? 10 : (tier <= -1 ? 6 : tier === 0 ? 10 : tier === 1 ? 12 : 15);
       const total = minT + rand(maxT - minT + 1);
       const part = 1 + rand(total - 1);
       const answer = total - part;
