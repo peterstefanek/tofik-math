@@ -1,4 +1,0 @@
-[     106ms] [LOG] %c * Tone.js v14.9.12 *  background: #000; color: #fff @ https://cdnjs.cloudflare.com/ajax/libs/tone/14.9.12/Tone.js:1
-[     129ms] [WARNING] The AudioContext was not allowed to start. It must be resumed (or created) after a user gesture on the page. https://developer.chrome.com/blog/autoplay/#web_audio @ https://cdnjs.cloudflare.com/ajax/libs/tone/14.9.12/Tone.js:1
-[     130ms] [WARNING] The AudioContext was not allowed to start. It must be resumed (or created) after a user gesture on the page. https://developer.chrome.com/blog/autoplay/#web_audio @ https://cdnjs.cloudflare.com/ajax/libs/tone/14.9.12/Tone.js:1
-[     410ms] [LOG] %c * Tone.js v14.9.12 *  background: #000; color: #fff @ https://cdnjs.cloudflare.com/ajax/libs/tone/14.9.12/Tone.js:1

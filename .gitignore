@@ -1,5 +1,6 @@
 # dependencies from local testing (Playwright etc.)
 node_modules/
+.playwright-mcp/
 package.json
 package-lock.json
 
