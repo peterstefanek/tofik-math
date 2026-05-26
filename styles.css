@@ -355,16 +355,16 @@
   }
   .map-mode-btn {
     background: var(--c-cream);
-    padding: 5px 12px;
+    padding: 6px 14px;
     border-radius: 20px;
     font-family: 'Baloo 2', sans-serif;
-    font-weight: 700;
-    font-size: 15px;
+    font-weight: 600;
+    font-size: 16px;
     color: var(--c-ink-soft);
     border: none;
     cursor: pointer;
     box-shadow: 0 2px 0 var(--c-shadow-soft);
-    min-height: 44px;
+    line-height: inherit;
   }
   .map-mode-btn:active { transform: translateY(1px); box-shadow: none; }
 
