@@ -6,7 +6,7 @@ import {
   rand, pick, shuffle,
   makeOptions, difficultyTier,
   generateOne, generateQuestions,
-} from '../questions.js';
+} from '../modules/questions.js';
 
 const mockState = { mode: 'do10' };
 const mockStats = { perType: {} };

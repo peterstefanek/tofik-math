@@ -1,16 +1,16 @@
-import { S } from './strings.js';
-import { audio } from './audio.js';
+import { S } from './modules/strings.js';
+import { audio } from './modules/audio.js';
 import {
   bindContext as bindQuestions,
   LEVEL_TYPES, QUESTIONS_PER_LEVEL, getLevelType,
   generateQuestions, generateOne, difficultyTier,
   pick,
-} from './questions.js';
+} from './modules/questions.js';
 import {
   bindContext as bindMechanics,
   renderCompareScale, renderRozkladShake, renderPeniazeScatter,
   buildWpHint, makeGroupedDots,
-} from './mechanics.js';
+} from './modules/mechanics.js';
 
 // ========== GAME STATE ==========
 const state = {

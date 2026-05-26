@@ -1,0 +1,95 @@
+- generic [ref=e2]:
+  - generic [ref=e3]:
+    - button "Pre rodiča" [ref=e4] [cursor=pointer]: ⚙️
+    - generic [ref=e5]:
+      - generic [ref=e6]: Učím sa matiku
+      - heading "Tofík a cesta ku hviezdam" [level=1] [ref=e7]:
+        - text: Tofík a
+        - text: cesta ku hviezdam
+      - generic [ref=e8]: ~ pre prvákov ~
+    - img [ref=e10]
+    - generic [ref=e30]: Pokračujme na ceste ku hviezdam!
+    - generic [ref=e31]: ⭐ 3
+    - button "Pokračovať →" [ref=e32] [cursor=pointer]
+  - generic:
+    - generic:
+      - generic: Vyber si
+      - heading "Do koľko chceš počítať?" [level=1]:
+        - text: Do koľko chceš
+        - text: počítať?
+    - generic:
+      - button "10 Do desiatich 6 úrovní začiatok 1. ročníka":
+        - generic: "10"
+        - generic: Do desiatich
+        - generic:
+          - text: 6 úrovní
+          - text: začiatok 1. ročníka
+      - button "20 Do dvadsiatich 7 úrovní celý 1. ročník":
+        - generic: "20"
+        - generic: Do dvadsiatich
+        - generic:
+          - text: 7 úrovní
+          - text: celý 1. ročník
+      - button "⭐ Pokročilé 7 úrovní pre šikovníkov":
+        - generic: ⭐
+        - generic: Pokročilé
+        - generic:
+          - text: 7 úrovní
+          - text: pre šikovníkov
+    - button "← Späť"
+  - generic:
+    - generic:
+      - generic: Vyber si
+      - heading "Kamaráta" [level=1]
+    - generic:
+      - generic: Ako sa volá?
+      - textbox "Ako sa volá?":
+        - /placeholder: Tofík
+    - generic:
+      - button "←"
+      - button "Ideme! ✓"
+  - generic:
+    - generic:
+      - button "Hlavné menu": ←
+      - generic: Cesta ku hviezdam
+      - generic:
+        - text: ⭐
+        - generic: "0"
+      - button "Zvuk": 🔊
+    - generic:
+      - img
+    - button "Pokračovať →"
+  - generic:
+    - generic:
+      - button "←"
+    - generic:
+      - generic: Koľko je jabĺčok?
+  - generic:
+    - generic:
+      - img
+    - generic: Super!
+    - generic:
+      - generic:
+        - img
+      - generic:
+        - img
+      - generic:
+        - img
+    - generic: Skvelá práca!
+    - button "Ďalej →"
+  - generic:
+    - generic: 🌟
+    - generic:
+      - text: Vyhral si!
+      - text: Dosiahli ste hviezdy!
+    - generic:
+      - text: ⭐
+      - generic: "0"
+      - text: z
+      - generic: "21"
+    - generic: Ďakujem ti, kamarát! Zahráme si znova?
+    - button "Hrať znova 🔄"
+  - generic:
+    - generic:
+      - button "←"
+      - generic: Pre rodiča
