@@ -1687,6 +1687,8 @@
     align-items: center;
     gap: 16px;
     padding: 8px 0 4px;
+    grid-column: 1 / -1;
+    width: 100%;
   }
   .bonus-text {
     font-size: 18px;
