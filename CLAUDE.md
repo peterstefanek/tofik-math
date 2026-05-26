@@ -26,13 +26,25 @@ Then open `http://localhost:8000/index.html`.
 
 | File | Purpose |
 | --- | --- |
-| `index.html` | HTML structure (~150 lines) |
-| `styles.css` | All CSS (~1 290 lines) |
-| `app.js` | All JavaScript (~1 775 lines) |
+| `index.html` | HTML structure |
+| `styles.css` | All CSS |
+| `app.js` | Main app — state, screens, game loop, rendering |
 | `manifest.json` | PWA manifest (name, icons, display mode, orientation) |
-| `service-worker.js` | Cache-first offline strategy, current cache key `tofik-v17` |
+| `service-worker.js` | Cache-first offline strategy, current cache key `tofik-v44` |
 | `icon.svg` | App icon (fox face, maskable, 512×512) |
 | `RULES.md` | Game rules, mechanics, question types — keep in sync with code |
+| `tests/` | Node.js unit tests (`node --test tests/*.test.js`) |
+
+### `modules/` — JS modules imported by `app.js`
+
+| File | Purpose |
+| --- | --- |
+| `modules/strings.js` | All Slovak UI strings — single source of truth for text |
+| `modules/audio.js` | Audio engine (Tone.js wrapper, sound effects, mute toggle) |
+| `modules/questions.js` | Question generation: all 12 types, `difficultyTier`, `makeOptions` |
+| `modules/mechanics.js` | Interactive render helpers: compare scale, rozklad shake, peniaze scatter, word problem hints |
+
+Inter-module imports use relative `'./...'` paths (siblings). `app.js` imports from `'./modules/...'`.
 
 ## Architecture
 
