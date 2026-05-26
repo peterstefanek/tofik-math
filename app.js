@@ -648,6 +648,10 @@ function confirmResetStats() {
   }
 }
 
+function confirmChangeDifficulty() {
+  if (confirm(S.confirm.changeDifficulty)) restartGame();
+}
+
 function restartGame() {
   // Full reset: clear progress and stored state, return to difficulty choice
   state.totalStars = 0;
@@ -720,6 +724,8 @@ function renderMap() {
   }
 
   document.getElementById('total-stars').textContent = state.totalStars;
+  const modeBtn = document.getElementById('map-mode-btn');
+  if (modeBtn) modeBtn.textContent = S.modeLabels[state.mode] ?? '';
 }
 
 // ========== QUESTION GENERATION ==========
@@ -2386,7 +2392,7 @@ Object.assign(window, {
   openParent, closeParent,
   toggleMute, restartGame,
   startBonusQuestion, finishLevel,
-  confirmRestart, confirmResetStats,
+  confirmRestart, confirmResetStats, confirmChangeDifficulty,
   requestPersistentStorage, renderParentStats,
   applyUpdate,
   audio,

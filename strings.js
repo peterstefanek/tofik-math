@@ -171,10 +171,18 @@ export const S = {
     privacy:            'Štatistiky sa ukladajú len v tomto zariadení. Nikam sa neodosielajú.',
   },
 
+  // ——— Difficulty mode labels ———
+  modeLabels: {
+    do10:      'Do 10',
+    do20:      'Do 20',
+    pokrocile: 'Pokročilé',
+  },
+
   // ——— Confirmation dialogs ———
   confirm: {
-    restart:    'Naozaj začať odznova? Stratíš všetok pokrok.',
-    resetStats: 'Naozaj vymazať všetky štatistiky? Pokrok v hre ostane zachovaný.',
+    restart:          'Naozaj začať odznova? Stratíš všetok pokrok.',
+    resetStats:       'Naozaj vymazať všetky štatistiky? Pokrok v hre ostane zachovaný.',
+    changeDifficulty: 'Zmeniť obtiažnosť? Stratíš celý herný postup.',
   },
 
   // ——— Time formatting ———
