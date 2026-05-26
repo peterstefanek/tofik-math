@@ -28,7 +28,7 @@ const state = {
 // Per-mode ordered question types (index = level index)
 const LEVEL_TYPES = {
   do10:     ['count','add5','rozklad','compare','add10','sequence'],
-  do20:     ['count','add5','rozklad','compare','add10','sequence','addsub20'],
+  do20:     ['compare','add5','rozklad','compare','add10','sequence','addsub20'],
   pokrocile:['compare','rozklad20','seqstep','addsub20','peniaze','wordproblem','magic'],
 };
 function getLevelType(idx) {
@@ -869,13 +869,30 @@ const WORD_PROBLEM_GENERATORS = [
 const WORD_PROBLEMS = S.wordProblems.map((wp, i) => ({ ...wp, ...WORD_PROBLEM_GENERATORS[i] }));
 
 // ========== MAGIC SQUARES BANK (row-major, all rows+cols sum to `sum`) ==========
-const MAGIC_SQUARES = [
+// Tiered by difficulty — used by generateOne('magic', tier)
+const MAGIC_EASY = [   // sum 6–9, small numbers
+  { grid: [1,2,3, 2,2,2, 3,2,1], sum: 6 },
+  { grid: [2,1,3, 3,2,1, 1,3,2], sum: 6 },
+  { grid: [3,2,1, 1,2,3, 2,2,2], sum: 6 },
+  { grid: [2,4,3, 4,1,4, 3,4,2], sum: 9 },
+  { grid: [3,2,4, 2,5,2, 4,2,3], sum: 9 },
+  { grid: [1,5,3, 5,1,3, 3,3,3], sum: 9 },
+];
+const MAGIC_MEDIUM = [ // sum 12
+  { grid: [1,6,5, 8,4,0, 3,2,7], sum: 12 },
+  { grid: [4,3,5, 6,4,2, 2,5,5], sum: 12 },
+  { grid: [2,6,4, 7,3,2, 3,3,6], sum: 12 },
+];
+const MAGIC_HARD = [   // sum 15, classic 1–9 squares
   { grid: [2,7,6, 9,5,1, 4,3,8], sum: 15 },
   { grid: [6,1,8, 7,5,3, 2,9,4], sum: 15 },
   { grid: [4,9,2, 3,5,7, 8,1,6], sum: 15 },
   { grid: [8,3,4, 1,5,9, 6,7,2], sum: 15 },
+];
+const MAGIC_EXPERT = [ // sum 18, larger numbers
   { grid: [12,4,2, 1,3,14, 5,11,2], sum: 18 },
-  { grid: [1,6,5, 8,4,0, 3,2,7], sum: 12 },
+  { grid: [8,4,6, 6,6,6, 4,8,6],    sum: 18 },
+  { grid: [9,3,6, 3,9,6, 6,6,6],    sum: 18 },
 ];
 
 function generateQuestions(type) {
@@ -931,14 +948,18 @@ function generateOne(type, tier = null) {
     case 'compare': {
       let a, b;
       const isPokrocile = state.mode === 'pokrocile';
-      if (tier <= -1 && !isPokrocile) {
+      const isDo20 = state.mode === 'do20';
+      if (tier <= -1 && !isPokrocile && !isDo20) {
         do { a = 1 + rand(6); b = 1 + rand(6); } while (a === b || Math.abs(a - b) < 3);
         return { type, variant: 'tap', answer: a > b ? 'L' : 'R', emoji, prompt: S.prompts.compareTap, a, b };
       }
-      const maxN = isPokrocile ? 18 : (tier === 0 ? 8 : tier === 1 ? 9 : 10);
+      let maxN;
+      if (isPokrocile) maxN = 18;
+      else if (isDo20) maxN = tier <= -1 ? 10 : tier === 0 ? 15 : tier === 1 ? 18 : 20;
+      else maxN = tier === 0 ? 8 : tier === 1 ? 9 : 10;
       do { a = 1 + rand(maxN); b = 1 + rand(maxN); } while (a === b);
-      // pokrocile: only tap (numbers too large for physical scale metaphor)
-      const tapChance = isPokrocile ? 10 : (tier === 1 ? 3 : tier >= 2 ? 0 : 5);
+      // for large-number modes mostly tap; scale works best with small emoji groups
+      const tapChance = (isPokrocile || isDo20) ? 6 : (tier === 1 ? 3 : tier >= 2 ? 0 : 5);
       const variant = rand(10) < tapChance ? 'tap' : 'scale';
       return {
         type, variant, answer: a > b ? 'L' : 'R', emoji,
@@ -1086,14 +1107,17 @@ function generateOne(type, tier = null) {
       };
     }
     case 'magic': {
-      const ms = MAGIC_SQUARES[rand(MAGIC_SQUARES.length)];
+      const magicPools = [MAGIC_EASY, MAGIC_MEDIUM, MAGIC_HARD, MAGIC_EXPERT];
+      const pool = magicPools[Math.max(0, Math.min(3, tier + 1))];
+      const ms = pool[rand(pool.length)];
       const blankPos = rand(9);
       const answer = ms.grid[blankPos];
+      const maxVal = Math.max(...ms.grid);
       return {
         type, answer,
         prompt: S.prompts.magicPrompt,
         grid: ms.grid, blankPos, sum: ms.sum,
-        options: makeOptions(answer, 0, 14),
+        options: makeOptions(answer, 0, maxVal + 2),
       };
     }
   }
