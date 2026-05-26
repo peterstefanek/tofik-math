@@ -81,13 +81,15 @@
   <!-- ========== MAP ========== -->
   <div class="screen map" id="screen-map">
     <div class="map-header">
-      <button class="icon-btn" onclick="goWelcome()" aria-label="Hlavné menu">←</button>
-      <div class="map-title">Cesta ku hviezdam</div>
-      <div class="map-header-info">
-        <div class="stars-total">⭐ <span id="total-stars">0</span></div>
-        <button id="map-mode-btn" class="map-mode-btn" onclick="confirmChangeDifficulty()" aria-label="Zmeniť obtiažnosť"></button>
+      <div class="map-header-row">
+        <button class="icon-btn" onclick="goWelcome()" aria-label="Hlavné menu">←</button>
+        <div class="map-header-info">
+          <div class="stars-total">⭐ <span id="total-stars">0</span></div>
+          <button id="map-mode-btn" class="map-mode-btn" onclick="confirmChangeDifficulty()" aria-label="Zmeniť obtiažnosť"></button>
+        </div>
+        <button class="map-mute-btn" id="map-mute-btn" onclick="toggleMute()" aria-label="Zvuk">🔊</button>
       </div>
-      <button class="map-mute-btn" id="map-mute-btn" onclick="toggleMute()" aria-label="Zvuk">🔊</button>
+      <div class="map-title">Cesta ku hviezdam</div>
     </div>
     <div class="map-canvas" id="map-canvas">
       <svg class="path-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
