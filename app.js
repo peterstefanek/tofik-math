@@ -2123,7 +2123,7 @@ function showResultScreen(stars) {
   if (lvl.bonus) {
     const bonusStar = document.createElement('div');
     bonusStar.className = 'star-bonus';
-    bonusStar.textContent = '🌟';
+    bonusStar.innerHTML = '<svg viewBox="0 0 24 24" fill="#f2c94c"><path d="M12 2 L15 9 L22 10 L17 15 L18 22 L12 18 L6 22 L7 15 L2 10 L9 9 Z" stroke="#d4a017" stroke-width="0.8"/></svg>';
     starsDisplay.appendChild(bonusStar);
     setTimeout(() => {
       bonusStar.classList.add('show');

@@ -1697,9 +1697,8 @@
     text-align: center;
   }
   .star-bonus {
-    width: 64px;
-    height: 64px;
-    font-size: 52px;
+    width: 76px;
+    height: 76px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1771,6 +1770,7 @@
     /* Result / Win */
     .result-title { font-size: 46px; }
     .star-big { width: 76px; height: 76px; }
+    .star-bonus { width: 90px; height: 90px; }
     .win-trophy { font-size: 120px; }
     .win-title { font-size: 40px; }
 
