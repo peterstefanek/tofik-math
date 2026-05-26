@@ -1165,13 +1165,48 @@ function renderQuestion() {
       const rhs = slot === 'b' ? '<span class="blank slot-blank" data-slot="b">&nbsp;</span>' : `<span>${q.b}</span>`;
       const res = slot === 'result' ? '<span class="blank slot-blank" data-slot="result">&nbsp;</span>' : `<span>${q.sum}</span>`;
       visual.innerHTML = `<div class="equation">${lhs}<span class="op">+</span>${rhs}<span class="op">=</span>${res}</div>`;
-      // Dot hint only when finding the result (otherwise it would give away the answer)
-      if (slot === 'result') {
-        const dots = document.createElement('div');
-        dots.style.fontSize = '22px';
-        dots.style.marginTop = '8px';
-        dots.innerHTML = q.emoji.repeat(q.a) + '<span style="opacity:0.4;margin:0 6px">+</span>' + q.emoji.repeat(q.b);
-        visual.appendChild(dots);
+      // Visual hint below equation
+      {
+        const hint = document.createElement('div');
+        hint.className = 'addend-hint';
+        const makeEmoji = (count, offset) => {
+          const wrap = document.createElement('span');
+          wrap.className = 'addend-known';
+          for (let i = 0; i < count; i++) {
+            const sp = document.createElement('span');
+            sp.className = 'addend-emoji';
+            sp.style.animationDelay = ((offset + i) * 70) + 'ms';
+            sp.textContent = q.emoji;
+            wrap.appendChild(sp);
+          }
+          return wrap;
+        };
+        const makeSep = () => {
+          const sp = document.createElement('span');
+          sp.className = 'addend-sep';
+          sp.textContent = '+';
+          return sp;
+        };
+        const makeMystery = () => {
+          const sp = document.createElement('span');
+          sp.className = 'addend-mystery';
+          sp.textContent = '?';
+          return sp;
+        };
+        if (slot === 'result') {
+          hint.appendChild(makeEmoji(q.a, 0));
+          hint.appendChild(makeSep());
+          hint.appendChild(makeEmoji(q.b, q.a));
+        } else if (slot === 'a') {
+          hint.appendChild(makeMystery());
+          hint.appendChild(makeSep());
+          hint.appendChild(makeEmoji(q.b, 0));
+        } else {
+          hint.appendChild(makeEmoji(q.a, 0));
+          hint.appendChild(makeSep());
+          hint.appendChild(makeMystery());
+        }
+        visual.appendChild(hint);
       }
       renderAnswerButtons(q.options, q.answer);
       break;
