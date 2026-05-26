@@ -286,7 +286,7 @@ function applyPet() {
   const title = document.getElementById('welcome-title');
   if (title) title.innerHTML = `${state.pet.name} a<br>cesta ku hviezdam`;
   const speech = document.getElementById('welcome-speech');
-  if (speech) speech.innerHTML = `Ahoj! Som <b>${state.pet.name}</b>. Snívam o hviezdach. Pomôžeš mi vyjsť na vrchol?`;
+  if (speech) speech.innerHTML = `Ahoj, som ${state.pet.name}. Poď so mnou na cestu ku hviezdam!`;
   document.title = `${state.pet.name} a cesta ku hviezdam`;
   updateWelcomeStars();
 }

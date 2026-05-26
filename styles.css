@@ -1653,17 +1653,15 @@
     text-align: center;
   }
   .star-bonus {
-    width: 44px;
-    height: 44px;
-    font-size: 36px;
+    width: 64px;
+    height: 64px;
+    font-size: 52px;
     display: flex;
     align-items: center;
     justify-content: center;
     opacity: 0;
     transform: scale(0) rotate(-180deg);
     margin-left: 4px;
-    align-self: flex-end;
-    margin-bottom: -10px;
   }
   .star-bonus.show {
     animation: star-pop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
