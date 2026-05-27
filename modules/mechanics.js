@@ -16,6 +16,10 @@ export async function renderCompareScale(q, visual) {
   const heavySide = q.a > q.b ? 'L' : 'R'; // q.answer
   const itemsL = q.emoji.repeat(q.a);
   const itemsR = q.emoji.repeat(q.b);
+  // Items are heaped on the pan (uniform size, slight overlap) so big counts
+  // stay inside the bowl instead of spilling out — the count badge is the
+  // authoritative value, the pile is just a size cue.
+  const pile = (items) => [...items].map(e => `<span class="item">${e}</span>`).join('');
   wrap.innerHTML = `
     <div class="scale-instruction" id="scale-instruction">Nakloň telefón k ťažšej strane!</div>
     <div class="scale-stage">
@@ -26,12 +30,12 @@ export async function renderCompareScale(q, visual) {
         <div class="scale-beam"></div>
         <div class="scale-pan left">
           <div class="scale-pan-rope"></div>
-          ${[...itemsL].map(e => `<span class="item">${e}</span>`).join('')}
+          <div class="scale-pan-items">${pile(itemsL)}</div>
           <div class="count-badge">${q.a}</div>
         </div>
         <div class="scale-pan right">
           <div class="scale-pan-rope"></div>
-          ${[...itemsR].map(e => `<span class="item">${e}</span>`).join('')}
+          <div class="scale-pan-items">${pile(itemsR)}</div>
           <div class="count-badge">${q.b}</div>
         </div>
       </div>

@@ -30,7 +30,7 @@ Then open `http://localhost:8000/index.html`.
 | `styles.css` | All CSS |
 | `app.js` | Main app — state, screens, game loop, rendering |
 | `manifest.json` | PWA manifest (name, icons, display mode, orientation) |
-| `service-worker.js` | Cache-first offline strategy, current cache key `tofik-v44` |
+| `service-worker.js` | Cache-first offline strategy, current cache key `tofik-v46` |
 | `icon.svg` | App icon (fox face, maskable, 512×512) |
 | `RULES.md` | Game rules, mechanics, question types — keep in sync with code |
 | `tests/` | Node.js unit tests (`node --test tests/*.test.js`) |

@@ -143,6 +143,14 @@ export const S = {
     magicSum:  (n) => `Súčet = <b>${n}</b>`,
   },
 
+  // ——— Difficulty badge (tier 1–4) ———
+  tier: {
+    names:   { 1: 'Najľahšie', 2: 'Základné', 3: 'Ťažšie', 4: 'Najťažšie' },
+    tooltip: (n) => `Úroveň náročnosti: <b>${n} zo 4</b> (${S.tier.names[n]}).<br>`
+      + 'Otázky sa prispôsobujú — keď sa ti darí, dostaneš ťažšie. '
+      + 'Posledná otázka v leveli a bonusová otázka sú vždy najťažšie.',
+  },
+
   // ——— Parent dashboard ———
   parent: {
     audio:              'Zvuky',
@@ -181,11 +189,20 @@ export const S = {
     pokrocile: 'Pokročilé',
   },
 
-  // ——— Confirmation dialogs ———
+  // ——— Confirmation dialogs (modal message bodies; the question is the modal title) ———
   confirm: {
-    restart:          'Naozaj začať odznova? Stratíš všetok pokrok.',
-    resetStats:       'Naozaj vymazať všetky štatistiky? Pokrok v hre ostane zachovaný.',
-    changeDifficulty: 'Zmeniť obtiažnosť? Stratíš celý herný postup.',
+    restart:          'Stratíš všetok pokrok.',
+    resetStats:       'Vymažú sa všetky štatistiky. Pokrok v hre ostane zachovaný.',
+    changeDifficulty: 'Stratíš celý herný postup.',
+  },
+
+  // ——— Reusable modal dialog (titles + buttons) ———
+  modal: {
+    yes:             'Áno',
+    no:              'Zrušiť',
+    changeTitle:     'Zmeniť obtiažnosť?',
+    restartTitle:    'Začať odznova?',
+    resetStatsTitle: 'Vymazať štatistiky?',
   },
 
   // ——— Time formatting ———

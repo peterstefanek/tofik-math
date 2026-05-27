@@ -119,42 +119,42 @@ describe('makeOptions', () => {
 // ─── difficultyTier ──────────────────────────────────────────────────────────
 
 describe('difficultyTier', () => {
-  test('returns 0 with no stats', () =>
-    withStats({}, () => assert.equal(difficultyTier('count'), 0)));
+  test('returns 2 (baseline) with no stats', () =>
+    withStats({}, () => assert.equal(difficultyTier('count'), 2)));
 
-  test('returns 0 when count < 4', () =>
+  test('returns 2 when count < 4', () =>
     withStats({ count: { count: 3, mistakes: 0 } }, () =>
-      assert.equal(difficultyTier('count'), 0)));
-
-  test('returns -1 when accuracy < 0.50', () =>
-    // acc = 1 - 11/(10+11) ≈ 0.476
-    withStats({ count: { count: 10, mistakes: 11 } }, () =>
-      assert.equal(difficultyTier('count'), -1)));
-
-  test('returns 0 when accuracy in [0.50, 0.70)', () =>
-    // acc = 1 - 5/(10+5) ≈ 0.667
-    withStats({ count: { count: 10, mistakes: 5 } }, () =>
-      assert.equal(difficultyTier('count'), 0)));
-
-  test('returns 0 when accuracy in [0.70, 0.85) but count < 6', () =>
-    // acc = 1 - 1/(5+1) ≈ 0.833, count=5 < 6
-    withStats({ count: { count: 5, mistakes: 1 } }, () =>
-      assert.equal(difficultyTier('count'), 0)));
-
-  test('returns 1 when accuracy in [0.70, 0.85) and count >= 6', () =>
-    // acc = 1 - 2/(10+2) ≈ 0.833
-    withStats({ count: { count: 10, mistakes: 2 } }, () =>
-      assert.equal(difficultyTier('count'), 1)));
-
-  test('returns 2 when accuracy >= 0.85 and count >= 10', () =>
-    // acc = 1 - 1/(10+1) ≈ 0.909
-    withStats({ count: { count: 10, mistakes: 1 } }, () =>
       assert.equal(difficultyTier('count'), 2)));
 
-  test('returns 0 when accuracy >= 0.85 but count < 10', () =>
+  test('returns 1 when accuracy < 0.50', () =>
+    // acc = 1 - 11/(10+11) ≈ 0.476
+    withStats({ count: { count: 10, mistakes: 11 } }, () =>
+      assert.equal(difficultyTier('count'), 1)));
+
+  test('returns 2 when accuracy in [0.50, 0.70)', () =>
+    // acc = 1 - 5/(10+5) ≈ 0.667
+    withStats({ count: { count: 10, mistakes: 5 } }, () =>
+      assert.equal(difficultyTier('count'), 2)));
+
+  test('returns 2 when accuracy in [0.70, 0.85) but count < 6', () =>
+    // acc = 1 - 1/(5+1) ≈ 0.833, count=5 < 6
+    withStats({ count: { count: 5, mistakes: 1 } }, () =>
+      assert.equal(difficultyTier('count'), 2)));
+
+  test('returns 3 when accuracy in [0.70, 0.85) and count >= 6', () =>
+    // acc = 1 - 2/(10+2) ≈ 0.833
+    withStats({ count: { count: 10, mistakes: 2 } }, () =>
+      assert.equal(difficultyTier('count'), 3)));
+
+  test('returns 4 when accuracy >= 0.85 and count >= 10', () =>
+    // acc = 1 - 1/(10+1) ≈ 0.909
+    withStats({ count: { count: 10, mistakes: 1 } }, () =>
+      assert.equal(difficultyTier('count'), 4)));
+
+  test('returns 2 when accuracy >= 0.85 but count < 10', () =>
     // acc = 1.0, count=8 < 10
     withStats({ count: { count: 8, mistakes: 0 } }, () =>
-      assert.equal(difficultyTier('count'), 0)));
+      assert.equal(difficultyTier('count'), 2)));
 });
 
 // ─── generateOne ─────────────────────────────────────────────────────────────
@@ -170,7 +170,7 @@ describe('generateOne — structure', () => {
       const modes = type === 'compare' ? ['do10', 'do20', 'pokrocile'] : ['do10'];
       for (const mode of modes) {
         withMode(mode, () => {
-          for (let tier = -1; tier <= 2; tier++) {
+          for (let tier = 1; tier <= 4; tier++) {
             for (let i = 0; i < 10; i++) {
               const q = generateOne(type, tier);
               assert.equal(q.type, type);
@@ -192,7 +192,7 @@ describe('generateOne — domain', () => {
   const N = 50;
 
   test('count: answer in range per tier', () => {
-    const ranges = [[-1, 2, 5], [0, 2, 8], [1, 3, 10], [2, 5, 12]];
+    const ranges = [[1, 2, 5], [2, 2, 8], [3, 3, 10], [4, 5, 12]];
     for (const [tier, lo, hi] of ranges) {
       for (let i = 0; i < N; i++) {
         const { answer } = generateOne('count', tier);
@@ -241,11 +241,27 @@ describe('generateOne — domain', () => {
     withMode('do20', () => {
       let sawLarge = false;
       for (let i = 0; i < 100; i++) {
-        const q = generateOne('compare', 2);
+        const q = generateOne('compare', 4);
         if (q.a > 10 || q.b > 10) sawLarge = true;
       }
-      assert.ok(sawLarge, 'do20 compare t=2 should produce numbers >10');
+      assert.ok(sawLarge, 'do20 compare t=4 should produce numbers >10');
     });
+  });
+
+  test('compare pokrocile: both sides above 10', () => {
+    withMode('pokrocile', () => {
+      for (let t = 1; t <= 4; t++)
+        for (let i = 0; i < 50; i++) {
+          const q = generateOne('compare', t);
+          assert.ok(q.a > 10 && q.b > 10, `pokrocile compare a=${q.a} b=${q.b}`);
+        }
+    });
+  });
+
+  test('generateOne stamps tier on the question', () => {
+    for (const type of ALL_TYPES)
+      for (let t = 1; t <= 4; t++)
+        assert.equal(generateOne(type, t).tier, t, `${type} t=${t}`);
   });
 
   test('sequence: seq[pos]=answer, length=5, arithmetic', () => {
@@ -287,7 +303,7 @@ describe('generateOne — domain', () => {
   });
 
   test('addsub20: sum in [0,20] for all tiers', () => {
-    for (let tier = -1; tier <= 2; tier++) {
+    for (let tier = 1; tier <= 4; tier++) {
       for (let i = 0; i < N; i++) {
         const q = generateOne('addsub20', tier);
         assert.ok(q.sum >= 0 && q.sum <= 20, `addsub20 t=${tier} sum=${q.sum}`);
@@ -323,14 +339,14 @@ describe('generateOne — domain', () => {
     }
   });
 
-  test('magic easy (tier -1): sum ≤ 9', () => {
+  test('magic easy (tier 1): sum ≤ 9', () => {
     for (let i = 0; i < 30; i++)
-      assert.ok(generateOne('magic', -1).sum <= 9);
+      assert.ok(generateOne('magic', 1).sum <= 9);
   });
 
-  test('magic expert (tier 2): sum >= 15', () => {
+  test('magic expert (tier 4): sum >= 15', () => {
     for (let i = 0; i < 30; i++)
-      assert.ok(generateOne('magic', 2).sum >= 15);
+      assert.ok(generateOne('magic', 4).sum >= 15);
   });
 
   test('wordproblem: op result in [0,20]', () => {

@@ -643,15 +643,50 @@ function renderRecentMistakes(wrongs) {
   }).join('');
 }
 
+// Reusable modal dialog — replaces native confirm() for a consistent in-app look.
+function showModal({ title, message, confirmText, cancelText, onConfirm, danger = false }) {
+  const overlay = document.getElementById('modal-overlay');
+  const card = overlay.querySelector('.modal-card');
+  const confirmBtn = document.getElementById('modal-confirm');
+  const cancelBtn = document.getElementById('modal-cancel');
+
+  document.getElementById('modal-title').textContent = title || '';
+  document.getElementById('modal-msg').textContent = message || '';
+  confirmBtn.textContent = confirmText || S.modal.yes;
+  cancelBtn.textContent = cancelText || S.modal.no;
+  card.classList.toggle('danger', !!danger);
+
+  const close = () => {
+    overlay.hidden = true;
+    document.removeEventListener('keydown', onKey);
+  };
+  const onKey = (e) => { if (e.key === 'Escape') { close(); audio.play('tap'); } };
+
+  confirmBtn.onclick = () => { close(); audio.play('tap'); onConfirm && onConfirm(); };
+  cancelBtn.onclick = () => { close(); audio.play('tap'); };
+  overlay.onclick = (e) => { if (e.target === overlay) { close(); audio.play('tap'); } };
+  document.addEventListener('keydown', onKey);
+
+  overlay.hidden = false;
+  audio.play('tap');
+}
+
 function confirmResetStats() {
-  if (confirm(S.confirm.resetStats)) {
-    clearStats();
-    renderParentStats();
-  }
+  showModal({
+    title: S.modal.resetStatsTitle,
+    message: S.confirm.resetStats,
+    danger: true,
+    onConfirm: () => { clearStats(); renderParentStats(); },
+  });
 }
 
 function confirmChangeDifficulty() {
-  if (confirm(S.confirm.changeDifficulty)) restartGame();
+  showModal({
+    title: S.modal.changeTitle,
+    message: S.confirm.changeDifficulty,
+    danger: true,
+    onConfirm: restartGame,
+  });
 }
 
 function restartGame() {
@@ -843,6 +878,18 @@ function renderQuestion() {
   prompt.textContent = q.prompt;
   visual.innerHTML = '';
   grid.innerHTML = '';
+
+  // Difficulty badge (tier 1–4) on the question card
+  {
+    const tier = q.tier ?? difficultyTier(q.type);
+    const badge = document.getElementById('tier-badge');
+    const tip = document.getElementById('tier-tooltip');
+    badge.textContent = String(tier);
+    badge.dataset.tier = String(tier);
+    tip.hidden = true;
+    tip.innerHTML = S.tier.tooltip(tier);
+    badge.onclick = (e) => { e.stopPropagation(); tip.hidden = !tip.hidden; audio.play('tap'); };
+  }
 
   progress.style.width = ((state.questionIdx) / QUESTIONS_PER_LEVEL * 100) + '%';
 
@@ -1280,7 +1327,7 @@ function startBonusQuestion() {
     const tier = difficultyTier(t);
     if (tier < minTier) { minTier = tier; bonusType = t; }
   }
-  const q = generateOne(bonusType, 2); // always tier 2 — hardest variant
+  const q = generateOne(bonusType, 4); // always tier 4 — hardest variant
   q.prompt = '⭐ ' + q.prompt;
   state.currentQuestions.push(q);
   state.questionIdx = QUESTIONS_PER_LEVEL;
@@ -1396,9 +1443,12 @@ function launchConfetti() {
 
 // ========== RESTART CONFIRMATION ==========
 function confirmRestart() {
-  if (confirm(S.confirm.restart)) {
-    restartGame();
-  }
+  showModal({
+    title: S.modal.restartTitle,
+    message: S.confirm.restart,
+    danger: true,
+    onConfirm: restartGame,
+  });
 }
 
 function toggleMute() {
@@ -1582,4 +1632,11 @@ Object.assign(window, {
   requestPersistentStorage, renderParentStats,
   applyUpdate, checkForUpdate,
   audio,
+});
+
+// Dismiss the difficulty tooltip when tapping anywhere outside the badge
+document.addEventListener('click', (e) => {
+  const tip = document.getElementById('tier-tooltip');
+  const badge = document.getElementById('tier-badge');
+  if (tip && !tip.hidden && !tip.contains(e.target) && e.target !== badge) tip.hidden = true;
 });

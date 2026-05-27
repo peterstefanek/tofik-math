@@ -478,6 +478,7 @@
   }
 
   .question-card {
+    position: relative;
     background: var(--c-cream);
     border-radius: 28px;
     padding: 24px 20px;
@@ -488,6 +489,63 @@
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     margin-top: 16px;
+  }
+
+  /* Difficulty badge (tier 1–4) in the top-right corner of the question card */
+  .tier-badge {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 34px;
+    height: 34px;
+    /* keep a ≥44px tap target via transparent extension */
+    padding: 5px;
+    box-sizing: content-box;
+    margin: -5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    border-radius: 50%;
+    font-family: 'Baloo 2', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1;
+    color: #fff;
+    background: var(--c-blue);
+    background-clip: padding-box;
+    box-shadow: 0 3px 0 var(--c-shadow-soft), 0 4px 8px var(--c-shadow);
+    cursor: pointer;
+    z-index: 21;
+  }
+  .tier-badge:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--c-shadow-soft); }
+  .tier-badge[data-tier="1"] { background: var(--c-green); }
+  .tier-badge[data-tier="2"] { background: var(--c-blue); }
+  .tier-badge[data-tier="3"] { background: var(--c-yellow); color: var(--c-ink); }
+  .tier-badge[data-tier="4"] { background: var(--c-accent); }
+
+  .tier-tooltip {
+    position: absolute;
+    top: 50px;
+    right: 8px;
+    max-width: 230px;
+    padding: 10px 14px;
+    background: #fff;
+    border: 2px solid var(--c-blue);
+    border-radius: 16px;
+    font-family: 'Andika', sans-serif;
+    font-size: 13px;
+    line-height: 1.4;
+    color: var(--c-ink);
+    text-align: left;
+    box-shadow: 0 4px 0 var(--c-shadow-soft), 0 6px 16px var(--c-shadow);
+    z-index: 20;
+    animation: tier-tip-in 0.18s ease;
+  }
+  .tier-tooltip[hidden] { display: none; }
+  @keyframes tier-tip-in {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: translateY(0); }
   }
   .question-prompt {
     font-size: 19px;
@@ -1063,19 +1121,30 @@
     background: linear-gradient(to bottom, #d4b896 0%, #a88a5c 100%);
     border-radius: 0 0 50px 50px / 0 0 30px 30px;
     border-top: 4px solid #c4a574;
-    display: flex;
-    flex-wrap: wrap;
-    align-items: flex-start;
-    justify-content: center;
-    padding: 6px 4px;
-    gap: 2px;
     box-shadow: 0 4px 8px var(--c-shadow-soft);
   }
   .scale-pan.left  { left: 4%; transform: translateY(0); }
   .scale-pan.right { right: 4%; transform: translateY(0); }
+  /* Items are heaped on the pan, anchored to the bottom and growing upward.
+     They may overlap — it's only a visual cue for the pile size. */
+  .scale-pan-items {
+    position: absolute;
+    left: 3px;
+    right: 3px;
+    bottom: 6px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-content: flex-end;
+    pointer-events: none;
+  }
   .scale-pan .item {
     font-size: 18px;
     line-height: 1;
+    /* One uniform size and overlap for every count. Rows pile up with a
+       slight overlap, so a bigger count = more rows = a visibly bigger heap.
+       Big counts simply overlap across more rows; emoji never shrink. */
+    margin: -3px -1px;
   }
   .scale-pan .count-badge {
     position: absolute;
@@ -1586,6 +1655,64 @@
     color: var(--c-blue);
   }
   .btn-secondary:active { background: rgba(95,183,212,0.25); }
+
+  /* ——— Reusable modal dialog ——— */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: max(24px, env(safe-area-inset-top)) 24px max(24px, env(safe-area-inset-bottom));
+    background: rgba(58, 46, 31, 0.45);
+    animation: modal-fade 0.2s ease;
+  }
+  .modal-overlay[hidden] { display: none; }
+  @keyframes modal-fade { from { opacity: 0; } to { opacity: 1; } }
+
+  .modal-card {
+    width: 100%;
+    max-width: 360px;
+    background: var(--c-cream);
+    border-radius: 24px;
+    padding: 24px 22px;
+    box-shadow: 0 8px 0 var(--c-shadow-soft), 0 16px 36px var(--c-shadow);
+    text-align: center;
+    animation: modal-pop 0.22s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+  }
+  @keyframes modal-pop {
+    from { opacity: 0; transform: scale(0.88); }
+    to   { opacity: 1; transform: scale(1); }
+  }
+  .modal-title {
+    font-family: 'Baloo 2', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--c-ink);
+    margin-bottom: 8px;
+  }
+  .modal-msg {
+    font-family: 'Andika', sans-serif;
+    font-size: 15px;
+    line-height: 1.45;
+    color: var(--c-ink-soft);
+    margin-bottom: 20px;
+  }
+  .modal-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .modal-actions .btn { font-size: 17px; padding: 12px 22px; }
+  .modal-card.danger #modal-confirm {
+    background: var(--c-accent-2);
+    box-shadow: 0 5px 0 #c9483f, 0 8px 18px var(--c-shadow);
+  }
+  .modal-card.danger #modal-confirm:active {
+    box-shadow: 0 2px 0 #c9483f, 0 4px 10px var(--c-shadow);
+  }
 
   /* Tiny parent gear icon on welcome screen */
   .parent-gear {

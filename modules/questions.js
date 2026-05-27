@@ -87,15 +87,17 @@ const MAGIC_EXPERT = [ // sum 18, larger numbers
   { grid: [9,3,6, 3,9,6, 6,6,6],    sum: 18 },
 ];
 
+// Difficulty tiers run 1..4 (1 = easiest, 2 = baseline/default, 3 = harder, 4 = hardest).
+// The value is shown directly to the player as a badge on the question card.
 export function difficultyTier(type) {
   const t = _stats.perType[type];
-  if (!t || t.count < 4) return 0;
+  if (!t || t.count < 4) return 2;                  // not enough data → baseline
   const acc = 1 - t.mistakes / (t.count + t.mistakes);
-  if (acc < 0.50) return -1;
-  if (acc < 0.70) return  0;
-  if (acc < 0.85 && t.count >= 6)  return 1;
-  if (acc >= 0.85 && t.count >= 10) return 2;
-  return 0;
+  if (acc < 0.50) return 1;                          // struggling → easiest
+  if (acc < 0.70) return 2;                          // baseline
+  if (acc < 0.85 && t.count >= 6)  return 3;         // doing well → harder
+  if (acc >= 0.85 && t.count >= 10) return 4;        // mastered → hardest
+  return 2;
 }
 
 export function makeOptions(correct, min, max) {
@@ -126,13 +128,19 @@ function pluralize(emoji) {
 
 export function generateOne(type, tier = null) {
   if (tier === null) tier = difficultyTier(type);
+  const q = buildQuestion(type, tier);
+  if (q) q.tier = tier;                 // stamp tier so the UI can show a difficulty badge
+  return q;
+}
+
+function buildQuestion(type, tier) {
   const emoji = pick(EMOJI_BY_LEVEL[type] || ['⭐']);
   switch (type) {
     case 'count': {
       const isDo10 = _state.mode === 'do10' || !_state.mode;
-      const lo = tier <= -1 ? 2 : tier === 0 ? 2 : tier === 1 ? 3 : 5;
-      const hi = isDo10 ? (tier <= -1 ? 5 : tier === 0 ? 8 : 10)
-                        : (tier <= -1 ? 5 : tier === 0 ? 8 : tier === 1 ? 10 : 12);
+      const lo = tier <= 1 ? 2 : tier === 2 ? 2 : tier === 3 ? 3 : 5;
+      const hi = isDo10 ? (tier <= 1 ? 5 : tier === 2 ? 8 : 10)
+                        : (tier <= 1 ? 5 : tier === 2 ? 8 : tier === 3 ? 10 : 12);
       const n = lo + rand(hi - lo + 1);
       return {
         type, answer: n, emoji,
@@ -142,10 +150,10 @@ export function generateOne(type, tier = null) {
       };
     }
     case 'add5': {
-      const a = tier <= -1 ? 1 + rand(2) : 1 + rand(4);
-      const b = tier <= -1 ? 1 + rand(2) : 1 + rand(5 - a);
+      const a = tier <= 1 ? 1 + rand(2) : 1 + rand(4);
+      const b = tier <= 1 ? 1 + rand(2) : 1 + rand(5 - a);
       const sum = a + b;
-      const resultChance = tier <= -1 ? 8 : tier === 0 ? 6 : tier === 1 ? 4 : 2;
+      const resultChance = tier <= 1 ? 8 : tier === 2 ? 6 : tier === 3 ? 4 : 2;
       const slot = rand(10) < resultChance ? 'result' : (rand(2) === 0 ? 'a' : 'b');
       const answer = slot === 'result' ? sum : (slot === 'a' ? a : b);
       return {
@@ -159,17 +167,17 @@ export function generateOne(type, tier = null) {
       let a, b;
       const isPokrocile = _state.mode === 'pokrocile';
       const isDo20 = _state.mode === 'do20';
-      if (tier <= -1 && !isPokrocile && !isDo20) {
+      if (tier <= 1 && !isPokrocile && !isDo20) {
         do { a = 1 + rand(6); b = 1 + rand(6); } while (a === b || Math.abs(a - b) < 3);
         return { type, variant: 'tap', answer: a > b ? 'L' : 'R', emoji, prompt: S.prompts.compareTap, a, b };
       }
-      let maxN;
-      if (isPokrocile) maxN = 18;
-      else if (isDo20) maxN = tier <= -1 ? 10 : tier === 0 ? 15 : tier === 1 ? 18 : 20;
-      else maxN = tier === 0 ? 8 : tier === 1 ? 9 : 10;
-      do { a = 1 + rand(maxN); b = 1 + rand(maxN); } while (a === b);
+      let minN = 1, maxN;
+      if (isPokrocile) { minN = 11; maxN = 18; }   // always above 10 — comparing from 1 is too easy
+      else if (isDo20) maxN = tier <= 1 ? 10 : tier === 2 ? 15 : tier === 3 ? 18 : 20;
+      else maxN = tier === 2 ? 8 : tier === 3 ? 9 : 10;
+      do { a = minN + rand(maxN - minN + 1); b = minN + rand(maxN - minN + 1); } while (a === b);
       // for large-number modes mostly tap; scale works best with small emoji groups
-      const tapChance = (isPokrocile || isDo20) ? 6 : (tier === 1 ? 3 : tier >= 2 ? 0 : 5);
+      const tapChance = (isPokrocile || isDo20) ? 6 : (tier === 3 ? 3 : tier >= 4 ? 0 : 5);
       const variant = rand(10) < tapChance ? 'tap' : 'scale';
       return {
         type, variant, answer: a > b ? 'L' : 'R', emoji,
@@ -178,11 +186,11 @@ export function generateOne(type, tier = null) {
       };
     }
     case 'add10': {
-      const a = tier <= -1 ? 1 + rand(4) : 1 + rand(8);
-      const maxB = tier <= -1 ? Math.min(5, 10 - a) : Math.min(9, 10 - a);
+      const a = tier <= 1 ? 1 + rand(4) : 1 + rand(8);
+      const maxB = tier <= 1 ? Math.min(5, 10 - a) : Math.min(9, 10 - a);
       const b = 1 + rand(Math.max(1, maxB));
       const sum = a + b;
-      const resultChance = tier <= -1 ? 8 : tier === 0 ? 6 : tier === 1 ? 4 : 2;
+      const resultChance = tier <= 1 ? 8 : tier === 2 ? 6 : tier === 3 ? 4 : 2;
       const slot = rand(10) < resultChance ? 'result' : (rand(2) === 0 ? 'a' : 'b');
       const answer = slot === 'result' ? sum : (slot === 'a' ? a : b);
       return {
@@ -193,10 +201,10 @@ export function generateOne(type, tier = null) {
       };
     }
     case 'sequence': {
-      const step = tier <= 0 ? 1 : tier === 1 ? (rand(2) === 0 ? 1 : 2) : (rand(2) === 0 ? 2 : 5);
-      const maxStart = tier <= -1 ? 3 : tier === 0 ? 5 : tier === 1 ? 8 : 10;
+      const step = tier <= 2 ? 1 : tier === 3 ? (rand(2) === 0 ? 1 : 2) : (rand(2) === 0 ? 2 : 5);
+      const maxStart = tier <= 1 ? 3 : tier === 2 ? 5 : tier === 3 ? 8 : 10;
       const start = 1 + rand(maxStart);
-      const pos = tier <= -1 ? 2 : 1 + rand(3);
+      const pos = tier <= 1 ? 2 : 1 + rand(3);
       const seq = [start, start+step, start+step*2, start+step*3, start+step*4];
       const answer = seq[pos];
       return {
@@ -208,12 +216,12 @@ export function generateOne(type, tier = null) {
     }
     case 'rozklad': {
       const isDo10 = _state.mode === 'do10' || !_state.mode;
-      const minT = tier <= -1 ? 4 : tier === 0 ? 5 : tier === 1 ? 7 : 10;
-      const maxT = isDo10 ? 10 : (tier <= -1 ? 6 : tier === 0 ? 10 : tier === 1 ? 12 : 15);
+      const minT = tier <= 1 ? 4 : tier === 2 ? 5 : tier === 3 ? 7 : 10;
+      const maxT = isDo10 ? 10 : (tier <= 1 ? 6 : tier === 2 ? 10 : tier === 3 ? 12 : 15);
       const total = minT + rand(maxT - minT + 1);
       const part = 1 + rand(total - 1);
       const answer = total - part;
-      const variant = tier <= -1 ? 'tree' : (rand(2) === 0 ? 'tree' : 'shake');
+      const variant = tier <= 1 ? 'tree' : (rand(2) === 0 ? 'tree' : 'shake');
       return {
         type, variant, answer, emoji,
         prompt: variant === 'shake'
@@ -224,16 +232,16 @@ export function generateOne(type, tier = null) {
       };
     }
     case 'addsub20': {
-      const addChance = tier <= -1 ? 10 : tier === 0 ? 5 : tier === 1 ? 3 : 2;
+      const addChance = tier <= 1 ? 10 : tier === 2 ? 5 : tier === 3 ? 3 : 2;
       const isAdd = rand(10) < addChance;
       const slot = rand(20) < 13 ? 'result' : (rand(2) === 0 ? 'a' : 'b');
       let a, b, sum;
       if (isAdd) {
-        // All tiers ≥ 0: sum must cross 10 (that's the whole point of do20)
-        const minA = tier <= -1 ? 5 : 8;
-        const maxA = tier <= -1 ? 12 : tier === 0 ? 12 : tier === 1 ? 14 : 17;
+        // All tiers ≥ 2: sum must cross 10 (that's the whole point of do20)
+        const minA = tier <= 1 ? 5 : 8;
+        const maxA = tier <= 1 ? 12 : tier === 2 ? 12 : tier === 3 ? 14 : 17;
         a = minA + rand(maxA - minA + 1);
-        const minB = tier <= -1 ? 2 : Math.max(3, 11 - a); // ensures sum > 10
+        const minB = tier <= 1 ? 2 : Math.max(3, 11 - a); // ensures sum > 10
         const maxB = Math.min(9, 20 - a);
         b = minB + rand(Math.max(1, maxB - minB + 1));
         sum = a + b;
@@ -252,7 +260,7 @@ export function generateOne(type, tier = null) {
       };
     }
     case 'seqstep': {
-      const step = tier <= 0 ? 2 : tier === 1 ? 2 + rand(2) : 3 + rand(2); // tier 0→2, tier 1→2-3, tier 2→3-4
+      const step = tier <= 2 ? 2 : tier === 3 ? 2 + rand(2) : 3 + rand(2); // tier ≤2→2, tier 3→2-3, tier 4→3-4
       const maxStart = 20 - 4 * step;
       const start = 1 + rand(Math.max(1, maxStart));
       const pos = 1 + rand(3); // gap at index 1, 2, or 3 (never 0)
@@ -319,7 +327,7 @@ export function generateOne(type, tier = null) {
     }
     case 'magic': {
       const magicPools = [MAGIC_EASY, MAGIC_MEDIUM, MAGIC_HARD, MAGIC_EXPERT];
-      const pool = magicPools[Math.max(0, Math.min(3, tier + 1))];
+      const pool = magicPools[Math.max(0, Math.min(3, tier - 1))]; // tier 1→EASY … 4→EXPERT
       const ms = pool[rand(pool.length)];
       const blankPos = rand(9);
       const answer = ms.grid[blankPos];
@@ -338,7 +346,7 @@ export function generateQuestions(type) {
   const baseTier = difficultyTier(type);
   const qs = [];
   for (let i = 0; i < QUESTIONS_PER_LEVEL; i++) {
-    const tier = i === QUESTIONS_PER_LEVEL - 1 ? Math.min(2, baseTier + 1) : baseTier;
+    const tier = i === QUESTIONS_PER_LEVEL - 1 ? Math.min(4, baseTier + 1) : baseTier;
     let q, safety = 0;
     const prevSig = qs.length > 0
       ? JSON.stringify({ a: qs[qs.length-1].a, b: qs[qs.length-1].b, answer: qs[qs.length-1].answer, pos: qs[qs.length-1].pos, total: qs[qs.length-1].total, part: qs[qs.length-1].part })

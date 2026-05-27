@@ -22,7 +22,7 @@ Tento dokument popisuje herné pravidlá, mechaniky a pedagogický zámer hry. *
 |-----|--------|------------|-----------|
 | **do 10** | 6 | 18 + bonusy | count, add5, rozklad, compare, add10, sequence |
 | **do 20** | 7 | 21 + bonusy | + addsub20 (7. level) |
-| **pokrocile** | 7 | 21 + bonusy | compare(1–18), rozklad20, seqstep, addsub20, peniaze, wordproblem, magic |
+| **pokrocile** | 7 | 21 + bonusy | compare(11–18), rozklad20, seqstep, addsub20, peniaze, wordproblem, magic |
 
 ---
 
@@ -44,7 +44,7 @@ Tento dokument popisuje herné pravidlá, mechaniky a pedagogický zámer hry. *
 
 | # | Meno | Ikona | Typ úlohy |
 |---|------|-------|-----------|
-| 1 | Lúka | 🌼 | `compare` — porovnávanie v rozsahu 1–18 |
+| 1 | Lúka | 🌼 | `compare` — porovnávanie v rozsahu 11–18 |
 | 2 | Sad | 🍎 | `rozklad20` — rozklad čísel 11–20 |
 | 3 | Vodopád | 💧 | `seqstep` — postupnosti s krokom +2/+3/+4 |
 | 4 | Jazierko | 🐟 | `addsub20` — sčítanie a odčítanie do 20 |
@@ -76,7 +76,7 @@ Tento dokument popisuje herné pravidlá, mechaniky a pedagogický zámer hry. *
 ### `compare` — Porovnávanie
 
 - Dve skupiny predmetov, hráč určí ktorá je väčšia
-- Rozsah hodnôt: 1–8 (módy `do10`/`do20`), 1–18 (mód `pokrocile`)
+- Rozsah hodnôt: 1–8 (módy `do10`/`do20`), 11–18 (mód `pokrocile` — vždy nad 10)
 - **Variant tap:** kliknutie na väčšiu skupinu
 - **Variant scale (váhy):** naklonienie telefónu k ťažšej strane
   - Správne naklonienie musí trvať 1 200 ms nepretržite
@@ -117,7 +117,7 @@ Tento dokument popisuje herné pravidlá, mechaniky a pedagogický zámer hry. *
 ### `seqstep` — Postupnosti s krokom
 
 - 5 čísel v rade, jedno je prázdne (pozícia 1–3)
-- Krok: +2 (tier 0), +2 alebo +3 (tier 1), +3 alebo +4 (tier 2)
+- Krok: +2 (úroveň ≤ 2), +2 alebo +3 (úroveň 3), +3 alebo +4 (úroveň 4)
 - Začiatok a krok volené tak, aby sekvencia zostala ≤ 20
 - Prompt: „Aké číslo chýba?"
 
@@ -164,6 +164,23 @@ Tento dokument popisuje herné pravidlá, mechaniky a pedagogický zámer hry. *
 
 ---
 
+## Adaptívna obtiažnosť (úrovne 1–4)
+
+Každý typ úlohy má vlastnú úroveň náročnosti **1–4**, ktorá sa prispôsobuje výkonu dieťaťa (`difficultyTier`):
+
+| Úroveň | Podmienka (úspešnosť daného typu) | Význam |
+| --- | --- | --- |
+| **1** | < 50 % | najľahšie (menšie čísla) |
+| **2** | 50–70 % alebo < 4 pokusy | základná / východisková |
+| **3** | 70–85 % (≥ 6 pokusov) | ťažšie |
+| **4** | ≥ 85 % (≥ 10 pokusov) | najťažšie |
+
+- Posledná (4.) otázka v leveli je vždy o úroveň vyššie (max 4).
+- Bonusová otázka je vždy úroveň 4.
+- **Indikátor:** v pravom hornom rohu karty s otázkou je farebná bublinka s číslom úrovne (1 zelená, 2 modrá, 3 žltá, 4 oranžová). Po klepnutí sa zobrazí tooltip s vysvetlením, čo úroveň znamená a kedy sa dieťa dostane na ťažšie otázky.
+
+---
+
 ## Hodnotenie — hviezdy
 
 | Chyby v leveli | Hviezdy |
@@ -185,7 +202,7 @@ Tento dokument popisuje herné pravidlá, mechaniky a pedagogický zámer hry. *
 - Časomiera je zelená; pod 5 s sa sfarbí na červenú a pulzuje
 - Správna odpoveď v čase → bonusová 🌟 hviezda pripísaná k levelu
 - Bonusová hviezda je zobrazená na uzle mapy ako malá animovaná 🌟
-- Bonusová otázka je vždy tier 2 (ťažšia než štandardné otázky levelu)
+- Bonusová otázka je vždy úroveň 4 (najťažšia, ťažšia než štandardné otázky levelu)
 
 ---
 
